@@ -1,0 +1,258 @@
+<!--
+-----
+
+rss-ticker v0.0.0
+
+(c) 2017-2019 John Erps
+
+-----
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-----
+-->
+
+<script>
+
+(function() {
+
+  let elem, root, ready = false;
+
+  const template = document.createElement('template');
+  template.innerHTML = `
+    <style>
+      :host { display: inline-block; }
+      :host([hidden]) { display: none; }
+    </style>
+  `;
+
+  class RssTicker extends HTMLElement {
+
+    static get observedAttributes() {
+      return ['url', 'speed'];
+    }
+
+    constructor() {
+      super();
+      elem = this;
+      this.attachShadow({mode: 'open'});
+      root = this.shadowRoot;
+      root.appendChild(document.importNode(template.content, true));
+      _channelListeners = [];
+    }
+
+    connectedCallback() {
+      this._upgradeProperty('url');
+      this._upgradeProperty('speed');
+      startticker();
+    }
+
+    disconnectedCallback() {
+      stopticker();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+    }
+
+    set url(value) {
+      this.setAttribute('url', String(value));
+    }
+
+    get url() {
+      return this.hasAttribute('url') ? this.getAttribute('url') : ''
+    }
+
+    set speed(value) {
+      let v = Number(value);
+      if (isNaN(v)) {
+        v = 50;
+      }
+      v = Math.trunc(v);
+      this.setAttribute('speed', String(v < 1 ? 1 : v > 100 ? 100 : 100));
+    }
+
+    get speed() {
+      return this.hasAttribute('speed') ? Number(this.getAttribute('speed')) : 50
+    }
+
+    addChannelListener(l) {
+      _channelListeners.push(l);
+    }
+
+    removeChannelListener(l) {
+      let i = _channelListeners.indexOf(l);
+      if (i >= 0) {
+        _channelListeners.splice(i, 1);
+      }
+    }
+
+    _triggerChannelEvent(o) {
+      _channelListeners.forEach(l => l.call(this, Object.assign({}, o)));
+    }
+
+    _upgradeProperty(prop) {
+      if (this.hasOwnProperty(prop)) {
+        let v = this[prop];
+        delete this[prop];
+        this[prop] = value;
+      }
+    }
+
+  }
+
+  let tickc = 0, wrapper = null, wrapperc = 0;
+
+  function runticker(f) {
+    if (tickc >= Number.MAX_SAFE_INTEGER) {
+      tickc = 0;
+    }
+    tickc++;
+    if (f !== false) {
+      tick(tickc);
+    }
+  }
+
+  function startticker() {
+    runticker(true);
+  }
+  function stopticker() {
+    runticker(false);
+  }
+
+  const busyind = ['\u22C5          ', '  \u22C5        ', '    \u22C5      ', '      \u22C5    ', '        \u22C5  ', '          \u22C5'];
+
+  function tick(tc) {
+
+    let fetched = false, fetching = false, rssstart = false, rsserr = false, rsslist = [{id:elem.id||''}];
+    let fbc = 0, fbct = performance.now();
+
+    if (wrapper) {
+      wrapper.remove();
+    }
+    wrapper = document.createElement('span');
+    wrapperc = tc;
+    root.appendChild(wrapper);
+
+    let af = function() {
+      if (stop()) {
+        release();
+        return;
+      }
+      if (ready) {
+        if (fetching) {
+          if (performance.now() - fbct > 400) {
+            fbct = performance.now();
+            wrapper.innerHTML = busyind[fbc < busyind.length ? fbc++ : (fbc = 0)];
+          }
+        } else {
+          if (!fetched) {
+            startfetch();
+          } else {
+            if (!rssstart) {
+              rssstart = true;
+              wrapper.innerHTML = '';
+              elem._triggerChannelEvent(rsslist[0]);
+            }
+            if (!rsserr) {
+            }
+          }
+        }
+      }
+      requestAnimationFrame(af);
+    }
+
+    function release() {
+      if (wrapper && wrapperc === tc) {
+        wrapper.remove();
+        wrapper = null;
+      }
+    }
+
+    function stop() {
+      return tc !== tickc;
+    }
+
+    function sanitizeUrl() {
+      let url = root.url;
+      if (!url) {
+        return undefined;
+      }
+      url = String(url).trim();
+      if (url.length === 0) {
+        return undefined;
+      }
+      if (url.substring(0, 7) !== 'http://' && url.substring(0, 8) !== 'https://') {
+        url = 'http://' + url;
+      }
+      return url;
+    }
+
+    async function startfetch() {
+      fetching = true;
+      function endfetch(err) {
+        if (err) {
+          rsserr = true;
+          rsslist[0].error = err;
+        }
+        fetching = false;
+        fetched = true;
+        return undefined;
+      }
+      try {
+        let url = sanitizeUrl();
+        if (!url) {
+          return endfetch('No url.');
+        }
+        let r = await fetch('/php/getfile.php?uri='+url);
+        if (stop()) {
+          endfetch(null);
+        }
+        if (!r.ok) {
+          throw new Error('Response not ok (' + r.status + ' ' + r.statusText() + ')');
+        }
+        let t = String(await r.text()).trim();
+        if (stop()) {
+          endfetch(null);
+        }
+        if (t.length === 0) {
+          throw new Error('Response empty.');
+        }
+        let p = new DOMParser();
+        let perrNS = p.parseFromString('INVALID', 'text/xml').getElementsByTagName('parsererror')[0].namespaceURI;
+        let d = p.parseFromString(t, 'text/xml');
+        if(d.getElementsByTagNameNS(perrNS, 'parsererror').length > 0) {
+          throw new Error('Could not parse XML.');
+        }
+      } catch(e) {
+        return endfetch(e.message || 'Error.');
+      }
+      return endfetch(null);
+    }
+
+    requestAnimationFrame(af);
+  }
+
+  customElements.define('rss-ticker', RssTicker);
+
+  customElements.whenDefined('rss-ticker').then(() => {
+    ready = true;
+  });
+
+})();
+
+</script>
