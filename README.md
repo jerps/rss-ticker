@@ -1,4 +1,4 @@
-## rss-ticker v0.0.0 - A html custom element which implements a RSS ticker
+## rss-ticker v0.0.0 - A html custom element which implements an RSS ticker
 
 ***
 
