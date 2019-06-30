@@ -1,6 +1,6 @@
 /*
 
-rss-ticker v0.2.0
+rss-ticker v0.2.1
 
 (c) 2019 John Erps
 
@@ -104,6 +104,7 @@ rssHtml.innerHTML = `
   </style>
 `;
 
+window.ShadyCSS && ShadyCSS.prepareTemplate(rssHtml, 'rss-ticker');
 export default class RssTicker extends HTMLElement {
 
   static get observedAttributes() {
@@ -126,6 +127,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   connectedCallback() {
+    window.ShadyCSS && ShadyCSS.styleElement(this);
     this._impl.upgradeProperty('url');
     this._impl.upgradeProperty('speed');
     this._impl.upgradeProperty('imgSize');
@@ -881,6 +883,7 @@ async function tick(tc, url) {
     initItemElsBusy = true;
     wrapper.style.transition = 'opacity 1s ease-out';
     wrapper.style.opacity = '0';
+    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
     await (new Promise((res,rej) => {
       setTimeout(() => res(null), 1000);
     }));
@@ -910,6 +913,7 @@ async function tick(tc, url) {
     setItemslen();
     initItemElsBusy = false;
     addwork(workUpdateItemTiming, 1, updItemTimingInterval);
+    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
     if (c) {
       initItemElsBusy2 = true;
       await (new Promise((res,rej) => {
@@ -1047,6 +1051,7 @@ async function tick(tc, url) {
     itemEls[i-1][4].style.borderRadius = '' + Math.round(h / 3) + 'px';
     itemEls[i-1][6].itemGapPx = g;
     itemEls[i-1][6].itemGap = ig;
+    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
   }
 
   function crtItemDateText(dat, x) {
@@ -1149,6 +1154,7 @@ async function tick(tc, url) {
             if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0 && rssSelItemno === p) {
               updateItemInfoBoxColor();
             }
+            window.ShadyCSS && ShadyCSS.styleSubtree(elem);
           }
         }
       }
@@ -1169,6 +1175,7 @@ async function tick(tc, url) {
       if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0 && rssSelItemno === i) {
         updateItemInfoBoxColor();
       }
+      window.ShadyCSS && ShadyCSS.styleSubtree(elem);
     }
   }
 
@@ -1258,6 +1265,7 @@ async function tick(tc, url) {
       rssSelPosX = e.pageX;
       rssSelPosY = 0;
       rssSelPosD = 0;
+      window.ShadyCSS && ShadyCSS.styleSubtree(elem);
     }
     rssSelItemnox = 0;
   }
@@ -1336,7 +1344,7 @@ async function tick(tc, url) {
     if (itemInfoBox || rssSelMode < 2 || rssSelItemno === 0 || rssSelItemno > rsslist.length - 1 || rssSelItemno > itemEls.length) {
       return;
     }
-    let r1 = itemEls[rssSelItemno-1][4].getBoundingClientRect(), r2 = elem.getBoundingClientRect();
+    let r1 = itemEls[rssSelItemno-1][4].getBoundingClientRect(), r2 = elem.getBoundingClientRect(), r3;
     if (r1.left < r2.left && r1.width - r2.left + r1.left < r1.width * 0.1 || r1.right > r2.right && r1.width - r1.right + r2.right < r1.width * 0.1) {
       return;
     }
@@ -1358,7 +1366,7 @@ async function tick(tc, url) {
     itemInfoBox.style.userSelect = 'none';
     itemInfoBox.style.top = '0px';
     itemInfoBox.style.left = '0px';
-    let e, e1, e2, dcont = false;;
+    let e, e1, e2, e3, dcont = false;;
     e1 = document.createElement('span');
     e1.style.lineHeight = '1.3';
     if (rsslist[rssSelItemno].description) {
@@ -1385,11 +1393,14 @@ async function tick(tc, url) {
     }
     let img = rsslist[rssSelItemno].image && (!rsslist[rssSelItemno].description || !rsslist[rssSelItemno].description.includes(rsslist[rssSelItemno].image[1].src)) && (!dcont || !rsslist[rssSelItemno].content || !rsslist[rssSelItemno].content.includes(rsslist[rssSelItemno].image[1].src));
     if (img) {
-      e = itemInfoBox.appendChild(rsslist[rssSelItemno].image[1]);
-      e.style.float = 'left';
-      e.style.maxWidth = '40%';
-      e.style.maxHeight = '80%';
-      e.style.margin = '0 1.2rem 0 0';
+      e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].image[1]);
+      e3.style.float = 'left';
+      e3.style.maxWidth = '40%';
+      e3.style.maxHeight = '80%';
+      e3.style.margin = '0 1.2rem 0 0';
+      let s = getComputedStyle(itemEls[rssSelItemno-1][0]);
+      e3.style.minWidth = '' + (parseFloat(s.width) * 2) + 'px';
+      e3.style.minHeight = '' + (parseFloat(s.height) * 2) + 'px';
     }
     itemInfoBox.appendChild(e1);
     if (rsslist[rssSelItemno].description && rsslist[rssSelItemno].content && dcont) {
@@ -1416,6 +1427,7 @@ async function tick(tc, url) {
       e1 = document.createElement('div');
       e1.style.display = 'flex';
       e1.style.flexDirection = 'column';
+      e1.style.clear = 'left';
       itemInfoBox.appendChild(e1);
       e = document.createElement('hr');
       e.style.backgroundColor = 'black';
@@ -1442,6 +1454,7 @@ async function tick(tc, url) {
       e.appendChild(e1);
       e2.appendChild(e);
     }
+    e3.style.borderRadius = '' + Math.round(Math.min(w0,h0)/16) + 'px';
     itemInfoBox.style.borderRadius = '' + Math.round(Math.min(w0,h0)/8) + 'px';
     itemInfoBox.style.top = '';
     itemInfoBox.style.left = '';
@@ -1483,6 +1496,7 @@ async function tick(tc, url) {
     updateItemInfoBoxColor();
     itemInfoBox.style.left = '' + l + 'px';
     itemInfoBox.style.opacity = '1';
+    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
   }
 
   function updateItemInfoBoxColor() {
@@ -1613,6 +1627,7 @@ async function tick(tc, url) {
         let col = itemEls[(rssSelItemnox||rssSelItemno)-1][6].col ? itemEls[(rssSelItemnox||rssSelItemno)-1][6].col : dftColorNew;
         itemEls[(rssSelItemnox||rssSelItemno)-1][4].style.borderColor = 'rgba('+col[0]+', '+col[1]+', '+col[2]+', 1)';
       }
+      window.ShadyCSS && ShadyCSS.styleSubtree(elem);
     }
     if (itemInfoBox) {
       itemInfoBox.style.opacity = '0';

@@ -1,4 +1,4 @@
-## rss-ticker v0.2.0 - A html custom element (web component) that implements an RSS/Atom ticker
+## rss-ticker v0.2.1 - A html custom element (web component) that implements an RSS/Atom ticker
 
 ***
 

@@ -1,13 +1,20 @@
 {
   "name": "@jerps/rss-ticker",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "browser": "index.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
     "build:prod": "webpack --config webpack.config.js --env.prod"
   },
   "description": "A html custom element (web component) that implements an RSS/Atom ticker",
-  "keywords": ["custom-element", "webcomponent", "rss", "rss-ticker", "rss-reader", "atom"],
+  "keywords": [
+    "custom-element",
+    "webcomponent",
+    "rss",
+    "rss-ticker",
+    "rss-reader",
+    "atom"
+  ],
   "license": "MIT",
   "author": {
     "name": "John Erps",
@@ -22,7 +29,11 @@
   "bugs": {
     "url": "https://github.com/jerps/rss-ticker/issues"
   },
-  "files": ["index.js", "README.md", "LICENSE.txt"],
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE.txt"
+  ],
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
