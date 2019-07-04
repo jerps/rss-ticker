@@ -1,4 +1,4 @@
-## rss-ticker v0.2.1 - A html custom element (web component) that implements an RSS/Atom ticker
+## rss-ticker v0.2.2 - A html custom element (web component) that implements an RSS/Atom ticker
 
 ***
 
@@ -7,6 +7,10 @@
 rss-ticker is [MIT Licensed](LICENSE.md). You may use, distribute and copy it under the license terms.
 
 ### Changes
+
+* v0.2.2 (july 5, 2019)
+
+  * Misc. bugfixes. Stable.
 
 * v0.2.0 (june 24, 2019)
 

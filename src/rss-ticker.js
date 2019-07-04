@@ -1,6 +1,6 @@
 /*
 
-rss-ticker v0.2.1
+rss-ticker v0.2.2
 
 (c) 2019 John Erps
 
@@ -105,6 +105,7 @@ rssHtml.innerHTML = `
 `;
 
 window.ShadyCSS && ShadyCSS.prepareTemplate(rssHtml, 'rss-ticker');
+
 export default class RssTicker extends HTMLElement {
 
   static get observedAttributes() {
@@ -1366,7 +1367,9 @@ async function tick(tc, url) {
     itemInfoBox.style.userSelect = 'none';
     itemInfoBox.style.top = '0px';
     itemInfoBox.style.left = '0px';
-    let e, e1, e2, e3, dcont = false;;
+    itemInfoBox.style.bottom = '';
+    itemInfoBox.style.right = '';
+    let e, e1, e2, e3 = null, dcont = false;;
     e1 = document.createElement('span');
     e1.style.lineHeight = '1.3';
     if (rsslist[rssSelItemno].description) {
@@ -1454,31 +1457,21 @@ async function tick(tc, url) {
       e.appendChild(e1);
       e2.appendChild(e);
     }
-    e3.style.borderRadius = '' + Math.round(Math.min(w0,h0)/16) + 'px';
+    if (e3) {
+      e3.style.borderRadius = '' + Math.round(Math.min(w0,h0)/16) + 'px';
+    }
     itemInfoBox.style.borderRadius = '' + Math.round(Math.min(w0,h0)/8) + 'px';
     itemInfoBox.style.top = '';
     itemInfoBox.style.left = '';
-    h = rssSelMode === 2 ? r1.top : document.body.clientHeight - r1.bottom;
-    h0 = -1;
-    for (;;) {
-      r3 = itemInfoBox.getBoundingClientRect();
-      if (h0 >= 0 && r3.height >= h0 || r3.height < h || r3.width > document.body.clientWidth * 0.8) {
-        if (h0 >= 0) {
-          itemInfoBox.style.width = '' + (r3.width / 1.05) + 'px';
-        }
-        break;
-      }
-      h0 = r3.height;
-      itemInfoBox.style.width = '' + (r3.width * 1.05) + 'px';
+    r3 = itemInfoBox.getBoundingClientRect();
+    let b = document.body.clientHeight - r1.bottom + r1.height + 2 - (rssSelMode === 3 ? r1.height + 4 + r3.height : 0);
+    if (b < 0) {
+      b = 0;
     }
-    r3 = itemInfoBox.getBoundingClientRect();
-    itemInfoBox.style.bottom = '' + (document.body.clientHeight - r1.bottom + r1.height + 2 - (rssSelMode === 3 ? r1.height + 4 + r3.height : 0)) + 'px';
-    r3 = itemInfoBox.getBoundingClientRect();
-    if (r3.top < 0) {
-      itemInfoBox.style.bottom = '';
+    if (b + r3.height > document.body.clientHeight) {
       itemInfoBox.style.top = '0px';
-    } else if (r3.bottom > document.body.clientHeight) {
-      itemInfoBox.style.bottom = '0px';
+    } else {
+      itemInfoBox.style.bottom = '' + b + 'px';
     }
     let l = (r1.left + (r1.width - r3.width) / 2);
     if (l + r3.width > r2.right) {
