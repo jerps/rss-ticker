@@ -27,7 +27,7 @@ module.exports = env => {
   if (env.prod) {conf=merge(conf, {
     devtool: 'source-map',
     module: {
-      rules : [
+      rules: [
         {
           test: /\.js$/,
           exclude: /node_modules/,
