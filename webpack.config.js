@@ -24,7 +24,8 @@ module.exports = env => {
     ]
   };
 
-  if (env.prod) {merge(conf, {
+  if (env.prod) {conf=merge(conf, {
+    devtool: 'source-map',
     module: {
       rules : [
         {
@@ -39,7 +40,7 @@ module.exports = env => {
         }
       ]
     }
-  });} else {merge(conf, {
+  });} else {conf=merge(conf, {
     devtool: 'cheap-module-eval-source-map'
   });}
   return conf;
