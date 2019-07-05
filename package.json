@@ -1,6 +1,6 @@
 {
   "name": "@jerps/rss-ticker",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "browser": "index.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
@@ -31,6 +31,7 @@
   },
   "files": [
     "index.js",
+    "index.js.map",
     "README.md",
     "LICENSE.txt"
   ],
@@ -42,5 +43,9 @@
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.2",
     "webpack-merge": "^4.2.1"
+  },
+  "dependencies": {
+    "core-js-pure": "^3.1.4",
+    "regenerator-runtime": "^0.13.2"
   }
 }

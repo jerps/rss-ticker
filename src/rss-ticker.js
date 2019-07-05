@@ -1,6 +1,6 @@
 /*
 
-rss-ticker v0.2.2
+rss-ticker v0.3.0
 
 (c) 2019 John Erps
 
@@ -21,6 +21,9 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+import "core-js-pure/stable";
+import "regenerator-runtime/runtime";
 
 const dftColorNew = [255, 0, 0], dftColorOld = [0, 0, 255], dftHrsNew = 1, dftHrsOld = 12, updItemTimingInterval = 20;
 
