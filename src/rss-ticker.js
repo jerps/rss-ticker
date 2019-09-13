@@ -1,25 +1,12 @@
+/* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.3.0
+rss-ticker v0.3.1
 
 (c) 2019 John Erps
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+This software is licensed under the MIT license (see LICENSE)
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 import "core-js-pure/stable";
@@ -107,7 +94,7 @@ rssHtml.innerHTML = `
   </style>
 `;
 
-window.ShadyCSS && ShadyCSS.prepareTemplate(rssHtml, 'rss-ticker');
+window.ShadyCSS && window.ShadyCSS.prepareTemplate(rssHtml, 'rss-ticker');
 
 export default class RssTicker extends HTMLElement {
 
@@ -120,18 +107,17 @@ export default class RssTicker extends HTMLElement {
     this.attachShadow({mode: 'open'});
     this.shadowRoot.appendChild(document.importNode(rssHtml.content, true));
     this._impl = impl(this);
-    this._impl.pv.fetchedListeners = [];
-    this._impl.pv.runListeners = [];
-    this._impl.pv.busyListeners = [];
-    this._impl.pv.connected = false;
-    this._impl.pv.errmsg = undefined;
-    this._impl.pv.fetchOpts = undefined;
+    this._impl.runningListeners = [];
+    this._impl.busyListeners = [];
+    this._impl.connected = false;
+    this._impl.errmsg = undefined;
+    this._impl.fetchOpts = undefined;
     this.setAttribute('color-new', 'rgb(' + dftColorNew[0] + ', ' + dftColorNew[1] + ', ' + dftColorNew[2] +')');
     this.setAttribute('color-old', 'rgb(' + dftColorOld[0] + ', ' + dftColorOld[1] + ', ' + dftColorOld[2] +')');
   }
 
   connectedCallback() {
-    window.ShadyCSS && ShadyCSS.styleElement(this);
+    window.ShadyCSS && window.ShadyCSS.styleElement(this);
     this._impl.upgradeProperty('url');
     this._impl.upgradeProperty('speed');
     this._impl.upgradeProperty('imgSize');
@@ -149,16 +135,19 @@ export default class RssTicker extends HTMLElement {
     this._impl.upgradeProperty('noImgs');
     this._impl.upgradeProperty('moveRight');
     this._impl.upgradeProperty('proxyUrl');
-    this._impl.upgradeProperty('cancelRun');
-    this._impl.pv.connected = true;
+    this._impl.upgradeProperty('contRun');
+    this._impl.connected = true;
   }
 
   disconnectedCallback() {
     this._impl.stop(true);
-    this._impl.pv.connected = false;
+    this._impl.connected = false;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue == newValue) {
+      return;
+    }
     switch (name) {
       case 'speed':
         this._impl.speedChanged();
@@ -199,8 +188,12 @@ export default class RssTicker extends HTMLElement {
     }
   }
 
-  set url(value) {
-    this.setAttribute('url', String(value).trim());
+  set url(v) {
+    if (v === undefined || v === null) {
+      this.removeAttribute('url');
+    } else {
+      this.setAttribute('url', String(v).trim());
+    }
   }
 
   get url() {
@@ -208,47 +201,67 @@ export default class RssTicker extends HTMLElement {
   }
 
   set speed(v) {
-    this.setAttribute('speed', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('speed');
+    } else {
+      this.setAttribute('speed', String(v));
+    }
   }
 
   get speed() {
     let v;
     v = (v = (this.hasAttribute('speed') ? this.getAttribute('speed') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? 3 : v < 1 ? 1 : v > 10 ? 10 : v;
+    return isNaN(v) ? '3' : v < 1 ? '1' : v > 10 ? '10' : String(v);
   }
 
   set imgSize(v) {
-    this.setAttribute('img-size', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('img-size');
+    } else {
+      this.setAttribute('img-size', String(v));
+    }
   }
 
   get imgSize() {
     let v;
     v = (v = (this.hasAttribute('img-size') ? this.getAttribute('img-size') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? 4 : v < 0.000001 ? 0.000001 : v > 999999 ? 999999 : v;
+    return isNaN(v) ? '4' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
   }
 
   set fontSize(v) {
-    this.setAttribute('font-size', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('font-size');
+    } else {
+      this.setAttribute('font-size', String(v));
+    }
   }
 
   get fontSize() {
     let v;
     v = (v = (this.hasAttribute('font-size') ? this.getAttribute('font-size') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? 1 : v < 0.000001 ? 0.000001 : v > 999999 ? 999999 : v;
+    return isNaN(v) ? '1' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
   }
 
   set itemGap(v) {
-    this.setAttribute('item-gap', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('item-gap');
+    } else {
+      this.setAttribute('item-gap', String(v));
+    }
   }
 
   get itemGap() {
     let v;
     v = (v = (this.hasAttribute('item-gap') ? this.getAttribute('item-gap') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? 1 : v < 0.000001 ? 0.000001 : v > 999999 ? 999999 : v;
+    return isNaN(v) ? '1' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : Srring(v);
   }
 
   set colorNew(v) {
-    this.setAttribute('color-new', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('color-new');
+    } else {
+      this.setAttribute('color-new', String(v));
+    }
   }
 
   get colorNew() {
@@ -261,7 +274,11 @@ export default class RssTicker extends HTMLElement {
   }
 
   set colorOld(v) {
-    this.setAttribute('color-old', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('color-old');
+    } else {
+      this.setAttribute('color-old', String(v));
+    }
   }
 
   get colorOld() {
@@ -274,37 +291,53 @@ export default class RssTicker extends HTMLElement {
   }
 
   set hrsNew(v) {
-    this.setAttribute('hrs-new', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('hrs-new');
+    } else {
+      this.setAttribute('hrs-new', String(v));
+    }
   }
 
   get hrsNew() {
     let v;
     v = (v = (this.hasAttribute('hrs-new') ? this.getAttribute('hrs-new') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? dftHrsNew : v < 0.000001 ? 0.000001 : v > 999999 ? 999999 : v;
+    return isNaN(v) ? String(dftHrsNew) : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
   }
 
   set hrsOld(v) {
-    this.setAttribute('hrs-old', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('hrs-new');
+    } else {
+      this.setAttribute('hrs-old', String(v));
+    }
   }
 
   get hrsOld() {
     let v;
     v = (v = (this.hasAttribute('hrs-old') ? this.getAttribute('hrs-old') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? dftHrsOld : v < 0.000001 ? 0.000001 : v > 999999 ? 999999 : v;
+    return isNaN(v) ? String(dftHrsOld) : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
   }
 
   set transparency(v) {
-    this.setAttribute('transparency', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('transparency');
+    } else {
+      this.setAttribute('transparency', String(v));
+    }
   }
 
   get transparency() {
     let v;
     v = (v = (this.hasAttribute('transparency') ? this.getAttribute('transparency') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? 0.8 : v < 0 ? 0 : v > 1 ? 1 : v;
+    return isNaN(v) ? '0.4' : v < 0 ? '0' : v > 1 ? '1' : String(v);
   }
 
   set infoBoxLinkColor(v) {
-    this.setAttribute('infobox-link-color', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('infobox-link-color');
+    } else {
+      this.setAttribute('infobox-link-color', String(v));
+    }
   }
 
   get infoBoxLinkColor() {
@@ -312,7 +345,11 @@ export default class RssTicker extends HTMLElement {
   }
 
   set infoBoxLinkBgColor(v) {
-    this.setAttribute('infobox-link-bgcolor', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('infobox-link-bgcolor');
+    } else {
+      this.setAttribute('infobox-link-bgcolor', String(v));
+    }
   }
 
   get infoBoxLinkBgColor() {
@@ -332,13 +369,17 @@ export default class RssTicker extends HTMLElement {
   }
 
   set refetchMins(v) {
-    this.setAttribute('refetch-mins', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('refetch-mins');
+    } else {
+      this.setAttribute('refetch-mins', String(v));
+    }
   }
 
   get refetchMins() {
     let v;
     v = (v = (this.hasAttribute('refetch-mins') ? this.getAttribute('refetch-mins') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? 15 : v < 0.000001 ? 0.000001 : v > 999999 ? 999999 : v;
+    return isNaN(v) ? '5' : v < 0 ? '0' : v > 999999 ? '999999' : String(v);
   }
 
   set noImgs(v) {
@@ -366,39 +407,47 @@ export default class RssTicker extends HTMLElement {
   }
 
   set proxyUrl(v) {
-    this.setAttribute('proxy-url', String(v));
+    if (v === undefined || v === null) {
+      this.removeAttribute('proxy-url');
+    } else {
+      this.setAttribute('proxy-url', String(v));
+    }
   }
 
   get proxyUrl() {
     return this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '';
   }
 
-  set cancelRun(v) {
+  set contRun(v) {
     if (Boolean(v)) {
-      this.setAttribute('cancel-run', '');
+      this.setAttribute('cont-run', '');
     } else {
-      this.removeAttribute('cancel-run');
+      this.removeAttribute('cont-run');
     }
   }
 
-  get cancelRun() {
-    return this.hasAttribute('cancel-run');
+  get contRun() {
+    return this.hasAttribute('cont-run');
+  }
+
+  get running() {
+    return !!this._impl.running;
   }
 
   get busy() {
-    return !!this._impl.pv.busy;
+    return !!this._impl.busy;
   }
 
   get errmsg() {
-    return this._impl.pv.errmsg || '';
+    return this._impl.errmsg;
   }
 
   set fetchOpts(opts) {
-    this._impl.pv.fetchOpts = Object.assign({}, opts);
+    this._impl.fetchOpts = Object.assign({}, opts);
   }
 
   get fetchOpts() {
-    return this._impl.pv.fetchOpts || {};
+    return this._impl.fetchOpts ? Object.assign({}, this._impl.fetchOpts) : {};
   }
 
   startTicker(url) {
@@ -409,46 +458,35 @@ export default class RssTicker extends HTMLElement {
     this._impl.stop();
   }
 
-  addFetchedListener(l) {
-    this._impl.pv.fetchedListeners.push(l);
+  addRunningListener(l) {
+    this._impl.runningListeners.push(l);
   }
 
-  removeFetchedListener(l) {
-    let i = this._impl.pv.fetchedListeners.indexOf(l);
+  removeRunningListener(l) {
+    let i = this._impl.runningListeners.indexOf(l);
     if (i >= 0) {
-      this._impl.pv.fetchedListeners.splice(i, 1);
-    }
-  }
-
-  addRunListener(l) {
-    this._impl.pv.runListeners.push(l);
-  }
-
-  removeRunListener(l) {
-    let i = this._impl.pv.runListeners.indexOf(l);
-    if (i >= 0) {
-      this._impl.pv.runListeners.splice(i, 1);
+      this._impl.runningListeners.splice(i, 1);
     }
   }
 
   addBusyListener(l) {
-    this._impl.pv.busyListeners.push(l);
+    this._impl.busyListeners.push(l);
   }
 
   removeBusyListener(l) {
-    let i = this._impl.pv.busyListeners.indexOf(l);
+    let i = this._impl.busyListeners.indexOf(l);
     if (i >= 0) {
-      this._impl.pv.busyListeners.splice(i, 1);
+      this._impl.busyListeners.splice(i, 1);
     }
   }
 
 }
 
-let ready = false, phimg = null;
+let ready = false, phimg = null, rl0 = null;
 
 function impl(elem) {
 
-let implexp = {pv: {busy: false}};
+let implexp = {busy: false, running: false};
 
 let root = elem.shadowRoot, tickc = 0, wrapper = null, wrapperc = 0, showedImgs = true;
 
@@ -570,7 +608,7 @@ function runticker(f, url) {
 }
 
 function startticker(url, immed) {
-  if (implexp.pv.busy && !immed && !elem.cancelRun) {
+  if (implexp.busy && !immed && elem.contRun) {
     requestStart(url);
   } else {
     runticker(true, url);
@@ -579,45 +617,37 @@ function startticker(url, immed) {
 implexp.start = startticker;
 
 function stopticker(immed) {
-  if (implexp.pv.busy && !immed && !elem.cancelRun) {
+  if (implexp.busy && !immed && elem.contRun) {
     requestStop();
   } else {
     runticker(false);
+    if (implexp.busy) {
+      implexp.busy = false;
+      triggerBusyEvent(false);
+    }
     clearElemCallbacks();
   }
 }
 implexp.stop = stopticker;
 
 implexp.upgradeProperty = prop => {
-  if (elem.hasOwnProperty(prop)) {
+  if (Object.prototype.hasOwnProperty.call(elem, prop)) {
     let v = elem[prop];
     delete elem[prop];
     elem[prop] = v;
   }
 };
 
-let triggerFetchedEvent = o => {
-  for (const l of implexp.pv.fetchedListeners) {
-    l.call(elem, Object.assign({}, o));
-  };
-};
-
-let triggerRunEvent = o => {
-  for (const l of implexp.pv.runListeners) {
-    l.call(elem, Object.assign({}, o));
-  };
-};
-
-let triggerBusyEvent = b => {
-  for (const l of implexp.pv.busyListeners) {
+function triggerBusyEvent(b) {
+  for (const l of implexp.busyListeners) {
     l.call(elem, b);
-  };
-};
+  }
+}
 
 async function tick(tc, url) {
 
-  if (!implexp.pv.busy) {
-    implexp.pv.busy = true;
+  if (!implexp.busy) {
+    implexp.busy = true;
     triggerBusyEvent(true);
   }
 
@@ -630,13 +660,13 @@ async function tick(tc, url) {
     }));
   }
 
-  let rsslist = [{id:elem.id||'', url: sanitizeUrl((url?url:'').trim() || elem.url.trim()), hasImgs: false, reqImgs: !elem.noImgs}];
+  let rsslist = [{id:elem.id||'', url: sanitizeUrl(url?url:elem.url), proxyUrl: sanitizeUrl(elem.proxyUrl), hasImgs: false, reqImgs: !elem.noImgs}];
   let fetched = false, fetching = false, rssstart = false, rsserr = false;
   let elemlen = 0, elemlen2 = 0, itemslen = 0, pos = 0, pos2 = 0, elemlent = 0, post = 0, posd = 0;
   let itemEls = [];
   let refetcht = performance.now();
   let startreq = false, startrequrl = null, stopreq = false;
-  let speed = elem.speed, transparency = elem.transparency;
+  let speed = Number(elem.speed), transparency = Number(elem.transparency);
   let initItemElsBusy = false, initItemElsBusy2 = false;
   let wq = [], wqi = 0;
   let rssSelMode = 0, rssSelItemno = 0, rssSelItemnox = 0, rssSelPosX = 0, rssSelPosY = 0, rssSelPosD = 0, rssSelMouseUp = true;
@@ -645,7 +675,28 @@ async function tick(tc, url) {
   let itemInfoBox = null, itemInfoBoxLinks = [];
   let epageY = 0;
 
-  implexp.pv.errmsg = undefined;
+  implexp.errmsg = null;
+
+  function triggerRunningEvent(r, x) {
+    if (implexp.runningListeners.length === 0) {
+      return;
+    }
+    let d = x || rsslist[0], ri = { running: r };
+    for (const a of ['id', 'url', 'proxyUrl', 'title', 'description', 'image', 'errmsg']) {
+      if (d[a]) {
+        ri[a] = d[a];
+      }
+    }
+    for (const l of implexp.runningListeners) {
+      l.call(elem, ri);
+    }
+  }
+
+  if (implexp.running) {
+    implexp.running = false;
+    triggerRunningEvent(false, rl0);
+  }
+  rl0 = rsslist[0];
 
   if (!wrapper) {
     wrapper = document.createElement('div');
@@ -654,7 +705,7 @@ async function tick(tc, url) {
   }
   wrapperc = tc;
 
-  wrapper.style.fontSize = '' + (elem.fontSize * 100) + '%';
+  wrapper.style.fontSize = '' + (Number(elem.fontSize) * 100) + '%';
 
   initItemEls('Fetching RSS/Atom Feed . . .', rsslist[0].url ? rsslist[0].url.length > 77 ? rsslist[0].url.substring(0,77)+'...' : rsslist[0].url : '?', showedImgs ? phimg : null, true);
 
@@ -670,20 +721,20 @@ async function tick(tc, url) {
   };
 
   speedChangedCallback = () => {
-    speed = elem.speed;
+    speed = Number(elem.speed);
   };
 
   imgSizeChangedCallback = () => {
-    addwork(workChangeImgSize, elem.imgSize);
+    addwork(workChangeImgSize, Number(elem.imgSize));
   };
 
   fontSizeChangedCallback = () => {
-    wrapper.style.fontSize = '' + (elem.fontSize * 100) + '%';
+    wrapper.style.fontSize = '' + (Number(elem.fontSize) * 100) + '%';
     addwork(workChangeItemGaps, null);
   };
 
   itemGapChangedCallback = () => {
-    addwork(workChangeItemGaps, elem.itemGap);
+    addwork(workChangeItemGaps, Number(elem.itemGap));
   };
 
   colorChangedCallback = () => {
@@ -703,17 +754,17 @@ async function tick(tc, url) {
   colorChangedCallback();
 
   hrsNewChangedCallback = () => {
-    hrsNew = elem.hrsNew;
+    hrsNew = Number(elem.hrsNew);
   };
   hrsNewChangedCallback();
 
   hrsOldChangedCallback = () => {
-    hrsOld = elem.hrsOld;
+    hrsOld = Number(elem.hrsOld);
   };
   hrsOldChangedCallback();
 
   transparencyChangedCallback = () => {
-    transparency = elem.transparency;
+    transparency = Number(elem.transparency);
     addwork(workChangeTransparency, null);
   };
 
@@ -739,26 +790,17 @@ async function tick(tc, url) {
   };
 
   function stop() {
-    return !ready || !implexp.pv.connected || tc !== tickc;
+    return tc !== tickc;
   }
 
   function release() {
-    let tbusy = false;
-    window.removeEventListener('mousedown', windowMouseDownHandler0);
-    window.removeEventListener('mousedown', windowMouseDownHandler);
-    window.removeEventListener('mouseup', windowMouseUpHandler);
-    window.removeEventListener('mousemove', windowMouseMoveHandler);
-    if (tc === tickc) {
-      if (implexp.pv.busy) {
-        tbusy = true;
-        implexp.pv.busy = false;
-      }
-      clearElemCallbacks();
-    }
-    if (wrapper && wrapperc === tc) {
-      wrapper.remove();
-      wrapper = null;
-    }
+    window.removeEventListener('touchstart', windowTouchStartListener0);
+    window.removeEventListener('mousedown', windowMouseDownListener0);
+    window.removeEventListener('mousedown', windowMouseDownListener);
+    window.removeEventListener('touchend', windowTouchEndListener);
+    window.removeEventListener('mouseup', windowMouseUpListener);
+    window.removeEventListener('touchmove', windowTouchMoveListener);
+    window.removeEventListener('mousemove', windowMouseMoveListener);
     rssSelMode = 0;
     removeItemInfoBox();
     rssSelItemno = 0;
@@ -767,8 +809,23 @@ async function tick(tc, url) {
     rssSelPosY = 0;
     rssSelPosD = 0;
     rssSelMouseUp = true;
-    if (tbusy) {
-      triggerBusyEvent(false);
+    if (tc === tickc) {
+      clearElemCallbacks();
+      if (implexp.running) {
+        implexp.running = false;
+        triggerRunningEvent(false);
+      }
+    }
+    if (wrapper && wrapperc === tc) {
+      wrapper.style.transition = 'opacity 1s ease-out';
+      wrapper.style.opacity = '0';
+      window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
+      setTimeout(() => {
+        if (wrapperc === tc) {
+          wrapper.remove();
+          wrapper = null;
+        }
+      }, 1000);
     }
   }
 
@@ -793,31 +850,34 @@ async function tick(tc, url) {
         }
       }
     }
-    if (!initItemElsBusy && !initItemElsBusy2) {
+    if (ready && implexp.connected && !initItemElsBusy && !initItemElsBusy2) {
       if (pos > 1) {
         pos = 1;
+        implexp.running = false;
+        triggerRunningEvent(false);
         if (startreq) {
           startticker(startrequrl, true);
         } else if (stopreq) {
           stopticker(true);
-        } else if (rssSelMode === 0) {
+        } else {
           pos = pos2 = post = posd = 0;
           if (!elem.keepUrl && elem.url.trim() && elem.url.trim() !== rsslist[0].url) {
             startticker(elem.url.trim(), true);
-          } else if ((performance.now() - refetcht) / 60000 > elem.refetchMins) {
+          } else if ((performance.now() - refetcht) / 60000 > Number(elem.refetchMins)) {
             startticker(rsslist[0].url, true);
-          } else if (rsserr) {
-            triggerRunEvent(rsslist[0]);
-          } else if (!rsslist[0].reqImgs && !elem.noImgs && !rsslist[0].hasImgs) {
-            startticker(rsslist[0].url, true);
-          } else {
-            if (!rsslist[0].reqImgs && !elem.noImgs || rsslist[0].reqImgs && elem.noImgs) {
-              rsslist[0].reqImgs = !rsslist[0].reqImgs;
-              if (rsslist[0].hasImgs) {
-                initItemEls();
+          } else if (!rsserr) {
+            if (!rsslist[0].reqImgs && !elem.noImgs && !rsslist[0].hasImgs) {
+              startticker(rsslist[0].url, true);
+            } else {
+              if (!rsslist[0].reqImgs && !elem.noImgs || rsslist[0].reqImgs && elem.noImgs) {
+                rsslist[0].reqImgs = !rsslist[0].reqImgs;
+                if (rsslist[0].hasImgs) {
+                  initItemEls();
+                }
               }
+              implexp.running = true;
+              triggerRunningEvent(true);
             }
-            triggerRunEvent(rsslist[0]);
           }
         }
       } else {
@@ -830,12 +890,12 @@ async function tick(tc, url) {
               calcPos(t);
             } else {
               rssstart = true;
-              triggerFetchedEvent(rsslist[0]);
-              triggerRunEvent(rsslist[0]);
+              implexp.running = true;
+              triggerRunningEvent(true);
               elemlen = elemlen2 = elem.getBoundingClientRect().width;
               if (rsserr) {
-                implexp.pv.errmsg = rsslist[0].error;
-                initItemEls('ERROR - ' + rsslist[0].error, rsslist[0].url ? rsslist[0].url.length > 77 ? rsslist[0].url.substring(0,77)+'...' : rsslist[0].url : '?', showedImgs ? phimg : null);
+                implexp.errmsg = rsslist[0].errmsg;
+                initItemEls('ERROR - ' + rsslist[0].errmsg, fullurl(), showedImgs ? phimg : null);
               } else {
                 initItemEls();
               }
@@ -887,7 +947,7 @@ async function tick(tc, url) {
     initItemElsBusy = true;
     wrapper.style.transition = 'opacity 1s ease-out';
     wrapper.style.opacity = '0';
-    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+    window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
     await (new Promise((res,rej) => {
       setTimeout(() => res(null), 1000);
     }));
@@ -908,16 +968,16 @@ async function tick(tc, url) {
         if (rsslist[0].reqImgs && rsslist[i].image) {
           showedImgs = true;
         }
-        addItemEl(i, rsslist[i].title, rsslist[i].date, rsslist[0].reqImgs ? rsslist[i].image ? rsslist[i].image[0] : null : null);
+        addItemEl(i, rsslist[i].title, rsslist[i].date, rsslist[0].reqImgs ? rsslist[i].image ? rsslist[i].imga[0] : null : null);
       }
     }
-    setItemGaps(elem.itemGap);
+    setItemGaps(Number(elem.itemGap));
     wrapper.style.transition = 'opacity 3s ease-in';
     wrapper.style.opacity = '1';
     setItemslen();
     initItemElsBusy = false;
     addwork(workUpdateItemTiming, 1, updItemTimingInterval);
-    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+    window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
     if (c) {
       initItemElsBusy2 = true;
       await (new Promise((res,rej) => {
@@ -963,7 +1023,7 @@ async function tick(tc, url) {
       e.classList.add('itemimg');
       e2 = document.createElement('div');
       e2.classList.add('item-img-div');
-      e2.style.height = '' + elem.imgSize + 'em';
+      e2.style.height = '' + Number(elem.imgSize) + 'em';
       e2.style.width = 'auto';
       e2.appendChild(img);
       e.appendChild(e2);
@@ -1002,18 +1062,24 @@ async function tick(tc, url) {
       ed.textContent = crtItemDateText(date);
     }
     if (ino) {
+      let mouseDownListener = ev => {
+        rssSelItemno = ino;
+      };
+      e0.addEventListener('touchstart', e => {
+        e.preventDefault();
+        mouseDownListener(neweo2(e));
+      }, false);
       e0.addEventListener('mousedown', e => {
         e.preventDefault();
-        rssSelItemno = ino;
+        mouseDownListener(neweo1(e));
       }, false);
-      e0.addEventListener('mousemove', e => {
-        e.preventDefault();
+      let mouseMoveListener = ev => {
         if (rssSelMode > 0 && rssSelItemno > 0 && ino !== rssSelItemno && !rssSelMouseUp && rssSelPosY === 0) {
           if (rssSelMode > 1) {
             rssSelMode = 1;
             removeItemInfoBox();
             rssSelItemnox = 0;
-            rssSelPosX = e.pageX;
+            rssSelPosX = ev.x;
             rssSelPosY = 0;
             rssSelPosD = 0;
           }
@@ -1025,6 +1091,14 @@ async function tick(tc, url) {
             itemEls[rssSelItemno-1][4].style.borderColor = 'black';
           }
         }
+      };
+      e0.addEventListener('touchmove', e => {
+        e.preventDefault();
+        mouseMoveListener(neweo2(e));
+      }, false);
+      e0.addEventListener('mousemove', e => {
+        e.preventDefault();
+        mouseMoveListener(neweo1(e));
       }, false);
     }
   }
@@ -1055,7 +1129,7 @@ async function tick(tc, url) {
     itemEls[i-1][4].style.borderRadius = '' + Math.round(h / 3) + 'px';
     itemEls[i-1][6].itemGapPx = g;
     itemEls[i-1][6].itemGap = ig;
-    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+    window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
   }
 
   function crtItemDateText(dat, x) {
@@ -1158,7 +1232,7 @@ async function tick(tc, url) {
             if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0 && rssSelItemno === p) {
               updateItemInfoBoxColor();
             }
-            window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+            window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
           }
         }
       }
@@ -1179,7 +1253,7 @@ async function tick(tc, url) {
       if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0 && rssSelItemno === i) {
         updateItemInfoBoxColor();
       }
-      window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+      window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
     }
   }
 
@@ -1240,19 +1314,31 @@ async function tick(tc, url) {
     rssSelItemnox = rssSelItemno;
     rssSelItemno = 0;
   }
-  window.addEventListener('mousedown', windowMouseDownHandler0, true);
+  let windowMouseDownHandler0Flag = false;
+  function windowTouchStartListener0(e) {
+    windowMouseDownHandler0Flag = true;
+    windowMouseDownHandler0(neweo2(e));
+  }
+  function windowMouseDownListener0(e) {
+    if (!windowMouseDownHandler0Flag) {
+      windowMouseDownHandler0(neweo1(e));
+    }
+    windowMouseDownHandler0Flag = false;
+  }
+  window.addEventListener('touchstart', windowTouchStartListener0, true);
+  window.addEventListener('mousedown', windowMouseDownListener0, true);
 
   function windowMouseDownHandler(e) {
     rssSelMouseUp = false;
     if (rssSelMode > 0) {
       if (itemInfoBox && rssSelMode > 1 && rssSelItemnox > 0) {
         let r = itemInfoBox.getBoundingClientRect();
-        if (e.pageX >= r.left && e.pageX <= r.right && e.pageY >= r.top && e.pageY <= r.bottom) {
-          e.preventDefault();
+        if (e.x >= r.left && e.x <= r.right && e.y >= r.top && e.y <= r.bottom) {
+          e.oe.preventDefault();
           rssSelItemno = rssSelItemnox;
           rssSelItemnox = 0;
-          rssSelPosY = e.pageY;
-          epageY = e.pageY;
+          rssSelPosY = e.y;
+          epageY = e.y;
           return;
         }
       }
@@ -1263,17 +1349,28 @@ async function tick(tc, url) {
       rssSelPosD = 0;
     }
     if (rssSelMode === 0 && rssSelItemno > 0) {
-      e.preventDefault();
       itemEls[rssSelItemno-1][4].style.borderColor = 'black';
       rssSelMode = 1;
-      rssSelPosX = e.pageX;
+      rssSelPosX = e.x;
       rssSelPosY = 0;
       rssSelPosD = 0;
-      window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+      window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
     }
     rssSelItemnox = 0;
   }
-  window.addEventListener('mousedown', windowMouseDownHandler, false);
+  let windowMouseDownHandlerFlag = false;
+  function windowTouchStartListener(e) {
+    windowMouseDownHandlerFlag = true;
+    windowMouseDownHandler(neweo2(e));
+  }
+  function windowMouseDownListener(e) {
+    if (!windowMouseDownHandlerFlag) {
+      windowMouseDownHandler(neweo1(e));
+    }
+    windowMouseDownHandlerFlag = false;
+  }
+  window.addEventListener('touchstart', windowTouchStartListener, false);
+  window.addEventListener('mousedown', windowMouseDownListener, false);
 
   function windowMouseUpHandler(e) {
     rssSelMouseUp = true;
@@ -1283,7 +1380,7 @@ async function tick(tc, url) {
     }
     if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0) {
       let r = itemInfoBox.getBoundingClientRect();
-      if (e.pageX >= r.left && e.pageX <= r.right && e.pageY >= r.top && e.pageY <= r.bottom) {
+      if (e.x >= r.left && e.x <= r.right && e.y >= r.top && e.y <= r.bottom) {
         return;
       }
     }
@@ -1294,55 +1391,80 @@ async function tick(tc, url) {
     rssSelPosX = 0;
     rssSelPosY = 0;
     rssSelPosD = 0;
-  };
-  window.addEventListener('mouseup', windowMouseUpHandler, false);
+  }
+  let windowMouseUpHandlerFlag = false;
+  function windowTouchEndListener(e) {
+    if (e.touches.length === 0) {
+      windowMouseUpHandlerFlag = true;
+      windowMouseUpHandler(neweo2(e));
+    }
+  }
+  function windowMouseUpListener(e) {
+    if (!windowMouseUpHandlerFlag) {
+      windowMouseUpHandler(neweo1(e));
+    }
+    windowMouseUpHandlerFlag = false;
+  }
+  window.addEventListener('touchend', windowTouchEndListener, false);
+  window.addEventListener('mouseup', windowMouseUpListener, false);
 
   function windowMouseMoveHandler(e) {
-    epageY = e.pageY;
+    epageY = e.y;
     if (rssSelMode === 0 || rssSelItemno === 0 || rssSelMouseUp || rssSelPosY > 0) {
       return;
     }
-    e.preventDefault();
     let r = itemEls[rssSelItemno - 1][4].getBoundingClientRect();
     let m = rssSelMode;
     if (rssSelMode === 1) {
-      if (e.pageY < r.top) {
+      if (e.y < r.top) {
         rssSelMode = 2;
         addItemInfoBox();
-      } else if (e.pageY > r.bottom) {
+      } else if (e.y > r.bottom) {
         rssSelMode = 3;
         addItemInfoBox();
       }
     } else if (rssSelMode === 2) {
-      if (e.pageY > r.bottom) {
+      if (e.y > r.bottom) {
         rssSelMode = 3;
         removeItemInfoBox();
         addItemInfoBox();
-      } else if (e.pageY > r.top) {
+      } else if (e.y > r.top) {
         rssSelMode = 1;
         removeItemInfoBox();
       }
     } else if (rssSelMode === 3) {
-      if (e.pageY < r.top) {
+      if (e.y < r.top) {
         rssSelMode = 2;
         removeItemInfoBox();
         addItemInfoBox();
-      } else if (e.pageY < r.bottom) {
+      } else if (e.y < r.bottom) {
         rssSelMode = 1;
         removeItemInfoBox();
       }
     }
     if (rssSelMode === 1) {
       if (m !== 1) {
-        rssSelPosX = e.pageX;
+        rssSelPosX = e.x;
       }
-      rssSelPosD = (rssSelPosD = (Math.abs(e.pageX - rssSelPosX) < screen.width * 0.02 ? 0 : e.pageX > rssSelPosX ? e.pageX - rssSelPosX - screen.width * 0.02 : e.pageX - rssSelPosX + screen.width * 0.02)  / (screen.width / 2)) < -1 ? -1 : rssSelPosD > 1 ? 1 : rssSelPosD;
+      rssSelPosD = (rssSelPosD = (Math.abs(e.x - rssSelPosX) < screen.width * 0.02 ? 0 : e.x > rssSelPosX ? e.x - rssSelPosX - screen.width * 0.02 : e.x - rssSelPosX + screen.width * 0.02)  / (screen.width / 2)) < -1 ? -1 : rssSelPosD > 1 ? 1 : rssSelPosD;
       if (mvright) {
         rssSelPosD = 0 - rssSelPosD;
       }
     }
   }
-  window.addEventListener('mousemove', windowMouseMoveHandler, false);
+  let windowMouseMoveHandlerFlag = false;
+  function windowTouchMoveListener(e) {
+    windowMouseMoveHandlerFlag = true;
+    windowMouseMoveHandler(neweo2(e));
+  }
+  function windowMouseMoveListener(e) {
+    if (!windowMouseMoveHandlerFlag) {
+      windowMouseMoveHandler(neweo1(e));
+    }
+    windowMouseMoveHandlerFlag = false;
+  }
+  window.addEventListener('touchmove', windowTouchMoveListener, false);
+  window.addEventListener('mousemove', windowMouseMoveListener, false);
 
   function addItemInfoBox() {
     if (itemInfoBox || rssSelMode < 2 || rssSelItemno === 0 || rssSelItemno > rsslist.length - 1 || rssSelItemno > itemEls.length) {
@@ -1361,6 +1483,7 @@ async function tick(tc, url) {
     itemInfoBox.style.borderStyle = 'solid';
     itemInfoBox.style.borderWidth = '2px';
     itemInfoBox.style.borderColor = 'black';
+    itemInfoBox.style.boxShadow = '-1px 7px 24px 3px rgba(0,0,0,0.75)';
     itemInfoBox.style.color = getComputedStyle(elem).color;
     itemInfoBox.style.fontFamily = getComputedStyle(elem).fontFamily;
     itemInfoBox.style.fontSize = Math.round(parseFloat(getComputedStyle(itemEls[rssSelItemno-1][5]).fontSize) * 0.95);
@@ -1377,29 +1500,29 @@ async function tick(tc, url) {
     e1.style.lineHeight = '1.3';
     if (rsslist[rssSelItemno].description) {
       e1.innerHTML = rsslist[rssSelItemno].description;
+      e = cvtItemInfoBoxLinks(e1);
+      replaceNodeChildren(e1, e.childNodes);
     } else if (rsslist[rssSelItemno].content) {
       e1.innerHTML = rsslist[rssSelItemno].content;
       dcont = true;
       e = cvtItemInfoBoxLinks(e1);
       replaceNodeChildren(e1, e.childNodes);
     }
+    styleItemInfoBoxImages(e1);
     if (rsslist[rssSelItemno].description && rsslist[rssSelItemno].content) {
       e2 = document.createElement('span');
       e2.style.lineHeight = '1.3';
       e2.innerHTML = rsslist[rssSelItemno].content;
+      styleItemInfoBoxImages(e2);
       if (e2.textContent.trim() !== e1.textContent.trim()) {
         dcont = true;
         e = cvtItemInfoBoxLinks(e2);
         replaceNodeChildren(e2, e.childNodes);
       }
     }
-    if (rsslist[rssSelItemno].description) {
-      e = cvtItemInfoBoxLinks(e1);
-      replaceNodeChildren(e1, e.childNodes);
-    }
-    let img = rsslist[rssSelItemno].image && (!rsslist[rssSelItemno].description || !rsslist[rssSelItemno].description.includes(rsslist[rssSelItemno].image[1].src)) && (!dcont || !rsslist[rssSelItemno].content || !rsslist[rssSelItemno].content.includes(rsslist[rssSelItemno].image[1].src));
+    let img = rsslist[rssSelItemno].image && (!rsslist[rssSelItemno].description || !rsslist[rssSelItemno].description.includes(rsslist[rssSelItemno].imga[1].src)) && (!dcont || !rsslist[rssSelItemno].content || !rsslist[rssSelItemno].content.includes(rsslist[rssSelItemno].imga[1].src));
     if (img) {
-      e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].image[1]);
+      e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].imga[1]);
       e3.style.float = 'left';
       e3.style.maxWidth = '40%';
       e3.style.maxHeight = '80%';
@@ -1418,12 +1541,12 @@ async function tick(tc, url) {
       itemInfoBox.appendChild(e);
       itemInfoBox.appendChild(e2);
     }
-    let w = Math.round(document.body.clientWidth > document.body.clientHeight ? document.body.clientWidth / (img ? 2 : 3) : document.body.clientWidth / (img ? 1.5 : 2));
+    let w = Math.round(document.body.clientWidth / 2);
     itemInfoBox.style.width = '' + w + 'px';
-    let h = itemInfoBox.getBoundingClientRect().height, h0, w0, w1 = w / 3;
+    let h = itemInfoBox.getBoundingClientRect().height, h0, w0, w1 = w / 3 + (img ? rsslist[rssSelItemno].imga[1].getBoundingClientRect().width : 0);
     do {
       w0 = w;
-      w *= 0.95;
+      w *= 0.99;
       itemInfoBox.style.width = '' + w + 'px';
       h0 = h;
       h = itemInfoBox.getBoundingClientRect().height;
@@ -1492,7 +1615,7 @@ async function tick(tc, url) {
     updateItemInfoBoxColor();
     itemInfoBox.style.left = '' + l + 'px';
     itemInfoBox.style.opacity = '1';
-    window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+    window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
   }
 
   function updateItemInfoBoxColor() {
@@ -1591,6 +1714,16 @@ async function tick(tc, url) {
     return a[0];
   }
 
+  function styleItemInfoBoxImages(e) {
+    let l = e.querySelectorAll('img');
+    for (const i of l) {
+      i.style.maxWidth = '100%';
+      i.style.width = 'auto';
+      i.style.maxHeight = '100%';
+      i.style.height = 'auto';
+    }
+  }
+
   function cvtItemInfoBoxLinks(n, l) {
     let n0 = n.cloneNode();
     let c = n.childNodes;
@@ -1623,7 +1756,7 @@ async function tick(tc, url) {
         let col = itemEls[(rssSelItemnox||rssSelItemno)-1][6].col ? itemEls[(rssSelItemnox||rssSelItemno)-1][6].col : dftColorNew;
         itemEls[(rssSelItemnox||rssSelItemno)-1][4].style.borderColor = 'rgba('+col[0]+', '+col[1]+', '+col[2]+', 1)';
       }
-      window.ShadyCSS && ShadyCSS.styleSubtree(elem);
+      window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
     }
     if (itemInfoBox) {
       itemInfoBox.style.opacity = '0';
@@ -1643,25 +1776,48 @@ async function tick(tc, url) {
     }
   }
 
+  function neweo1(e) {
+    return { x: e.pageX, y: e.pageY, oe: e };
+  }
+  function neweo2(e) {
+    return e.touches.length === 0 ? { x: 0, y: 0, oe: e } : { x: e.touches[0].clientX, y: e.touches[0].clientY, oe: e };
+  }
+
   function sanitizeUrl(url) {
     if (!url) {
-      return undefined;
+      return '?';
     }
     let u = String(url).trim();
     if (u.length === 0) {
-      return undefined;
+      return '';
     }
     return u;
+  }
+
+  function fullurl() {
+    let url = rsslist[0].url;
+    if (rsslist[0].proxyUrl) {
+      if (rsslist[0].proxyUrl.indexOf('%%_URL_%%') === -1) {
+        url = rsslist[0].proxyUrl;
+      } else {
+        url = rsslist[0].proxyUrl.replace('%%_URL_%%', rsslist[0].url || '?');
+      }
+    } else if (rsslist[0].url) {
+      url = rsslist[0].url;
+    } else {
+      url = '?';
+    }
+    return url;
   }
 
   async function startFetch() {
 
     fetching = true;
 
-    function endFetch(err) {
-      if (err) {
+    function endFetch(errmsg) {
+      if (errmsg) {
         rsserr = true;
-        rsslist[0].error = err;
+        rsslist[0].errmsg = errmsg;
       }
       fetching = false;
       fetched = true;
@@ -1674,17 +1830,7 @@ async function tick(tc, url) {
         return endFetch('No url.');
       }
 
-      let url2 = '';
-      if (elem.proxyUrl) {
-        url2 = sanitizeUrl(elem.proxyUrl);
-        if (url2.indexOf('%%_URL_%%') === -1) {
-          throw new Error('Proxy url contains no %%_URL_%%.');
-        }
-        url2 = url2.replace('%%_URL_%%', rsslist[0].url);
-      } else {
-        url2 = rsslist[0].url;
-      }
-      let r = await fetch(url2, elem.fetchOpts);
+      let r = await fetch(fullurl(), elem.fetchOpts);
       if (stop()) {
         endFetch(null);
       }
@@ -1828,12 +1974,15 @@ async function tick(tc, url) {
                   q = 1;
                 } else if (t0.includes('enclosure') && ci1 === -1 && an === 'url') {
                   q = 2;
-                } else if (t0.includes('image') || t1.includes('image') || an.includes('image') || t0.includes('media') || t1.includes('media') || an.includes('media') || t0.includes('thumbnail') || t1.includes('thumbnail') || an.includes('thumbnail') || t0.includes('icon') || t1.includes('icon') || an.includes('icon') || t0.includes('logo') || t1.includes('logo') || an.includes('logo')) {
+                } else if (t0.includes('image') || ci1 !== -1 && t1.includes('image') || ai !== -1 && an.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || ai !== -1 && an.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || ai !== -1 && an.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || ai !== -1 && an.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo') || ai !== -1 && an.includes('logo')) {
                   q = 3;
                 } else if (t0.includes('title') || t0.includes('description') || t0.includes('summary') || t0.includes('content')) {
-                  q = 4;
+                  q = 5;
                 }
                 addiu(n, q, ua);
+              }
+              if (ai !== -1 && (an.includes('url') || an.includes('link')) && (t0.includes('image') || ci1 !== -1 && t1.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo'))) {
+                addiu(n, 4, [s]);
               }
             }
             if (ai === -1) {
@@ -1891,6 +2040,15 @@ async function tick(tc, url) {
       }
 
       extr(p, 0);
+
+      for (const i of rsslist) {
+        if (!i.title) {
+          i.title = '';
+        }
+        if (!i.description) {
+          i.description = '';
+        }
+      }
 
       function dateFromString(s) {
         let d = new Date(s);
@@ -1983,7 +2141,8 @@ async function tick(tc, url) {
                 });
                 if (a[1]) {
                   rsslist[0].hasImgs = true;
-                  rsslist[n].image = a;
+                  rsslist[n].image = a[1];
+                  rsslist[n].imga = a;
                   return;
                 } else {
                   ua[msi] = null;
@@ -2005,7 +2164,7 @@ async function tick(tc, url) {
       }
 
     } catch(e) {
-      return endFetch(e.message || 'Could not fetch or parse RSS.');
+      return endFetch(e.message || 'Could not fetch or parse RSS/Atom feed.');
     }
 
     return endFetch(null);

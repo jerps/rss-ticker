@@ -1,7 +1,7 @@
 {
   "name": "@jerps/rss-ticker",
-  "version": "0.3.0",
-  "browser": "index.js",
+  "version": "0.3.1",
+  "main": "rss-ticker.min.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
     "build:prod": "webpack --config webpack.config.js --env.prod"
@@ -30,18 +30,19 @@
     "url": "https://github.com/jerps/rss-ticker/issues"
   },
   "files": [
-    "index.js",
-    "index.js.map",
+    "rss-ticker.min.js",
+    "rss-ticker.min.js.map",
     "README.md",
-    "LICENSE.txt"
+    "LICENSE.txt",
+    "src"
   ],
   "devDependencies": {
-    "@babel/core": "^7.5.0",
-    "@babel/preset-env": "^7.5.0",
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
     "babel-loader": "^8.0.6",
     "path": "^0.12.7",
-    "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.2",
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.6",
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {

@@ -1,3 +1,14 @@
+/*
+
+Webpack configuration file
+
+(c) 2019 John Erps
+
+This software is licensed under the MIT license (see LICENSE)
+
+*/
+
+
 const path = require('path');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
@@ -7,7 +18,7 @@ module.exports = env => {
 
   env = env ? env : {};
 
-  conf = {
+  let conf = {
     mode: env.prod ? 'production' : 'development',
     context: path.resolve(__dirname),
     entry: {
@@ -15,7 +26,7 @@ module.exports = env => {
     },
     output: {
       path: path.resolve(__dirname),
-      filename: 'index.js',
+      filename: 'rss-ticker.min.js',
       library: 'ModuleRssTicker',
       libraryTarget: 'umd'
     },
