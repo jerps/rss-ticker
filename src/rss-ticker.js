@@ -938,7 +938,7 @@ async function tick(tc, url) {
       }
     }
     if (posd === 0 || t - post > 50) {
-      posd = elemlen * 100 / (50000 - 49900 * Math.log2(speed) / 3.321928094887362) / (elemlen + 100 + itemslen);
+      posd = elemlen * 100 / (50000 - 49900 * (1 - Math.pow(11 - speed, 4) / 10000)) / (elemlen + 100 + itemslen);
       post = t;
     }
   }
