@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.3.1
+rss-ticker v0.3.2
 
 (c) 2019 John Erps
 

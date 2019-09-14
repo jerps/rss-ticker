@@ -1,6 +1,6 @@
 {
   "name": "@jerps/rss-ticker",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "main": "rss-ticker.min.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
@@ -37,16 +37,16 @@
     "src"
   ],
   "devDependencies": {
-    "@babel/core": "^7.5.4",
-    "@babel/preset-env": "^7.5.4",
+    "@babel/core": "^7.6.0",
+    "@babel/preset-env": "^7.6.0",
     "babel-loader": "^8.0.6",
     "path": "^0.12.7",
-    "webpack": "^4.35.3",
-    "webpack-cli": "^3.3.6",
-    "webpack-merge": "^4.2.1"
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.8",
+    "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "core-js-pure": "^3.1.4",
-    "regenerator-runtime": "^0.13.2"
+    "core-js-pure": "^3.2.1",
+    "regenerator-runtime": "^0.13.3"
   }
 }
