@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.3.2
+rss-ticker v0.3.3
 
 (c) 2019 John Erps
 
@@ -488,7 +488,7 @@ function impl(elem) {
 
 let implexp = {busy: false, running: false};
 
-let root = elem.shadowRoot, tickc = 0, wrapper = null, wrapperc = 0, showedImgs = true;
+let root = elem.shadowRoot, tickc = 0, wrapper = null, actc = 0, showedImgs = true;
 
 let startRequestedCallback = null;
 function requestStart(url) {
@@ -675,6 +675,8 @@ async function tick(tc, url) {
   let itemInfoBox = null, itemInfoBoxLinks = [];
   let epageY = 0;
 
+  actc = tc;
+
   implexp.errmsg = null;
 
   function triggerRunningEvent(r, x) {
@@ -703,7 +705,6 @@ async function tick(tc, url) {
     wrapper.id = 'wrapper';
     root.appendChild(wrapper);
   }
-  wrapperc = tc;
 
   wrapper.style.fontSize = '' + (Number(elem.fontSize) * 100) + '%';
 
@@ -809,19 +810,19 @@ async function tick(tc, url) {
     rssSelPosY = 0;
     rssSelPosD = 0;
     rssSelMouseUp = true;
-    if (tc === tickc) {
+    if (tc === actc) {
       clearElemCallbacks();
       if (implexp.running) {
         implexp.running = false;
         triggerRunningEvent(false);
       }
     }
-    if (wrapper && wrapperc === tc) {
+    if (wrapper && tc === actc) {
       wrapper.style.transition = 'opacity 1s ease-out';
       wrapper.style.opacity = '0';
       window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
       setTimeout(() => {
-        if (wrapperc === tc) {
+        if (tc === actc) {
           wrapper.remove();
           wrapper = null;
         }
@@ -865,7 +866,10 @@ async function tick(tc, url) {
             startticker(elem.url.trim(), true);
           } else if ((performance.now() - refetcht) / 60000 > Number(elem.refetchMins)) {
             startticker(rsslist[0].url, true);
-          } else if (!rsserr) {
+          } else if (rsserr) {
+            implexp.running = true;
+            triggerRunningEvent(true);
+          } else {
             if (!rsslist[0].reqImgs && !elem.noImgs && !rsslist[0].hasImgs) {
               startticker(rsslist[0].url, true);
             } else {
