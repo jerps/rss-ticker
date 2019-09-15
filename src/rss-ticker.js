@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.3.3
+rss-ticker v0.4.0
 
 (c) 2019 John Erps
 
@@ -99,7 +99,7 @@ window.ShadyCSS && window.ShadyCSS.prepareTemplate(rssHtml, 'rss-ticker');
 export default class RssTicker extends HTMLElement {
 
   static get observedAttributes() {
-    return ['speed', 'img-size', 'font-size', 'item-gap', 'color-new', 'color-old', 'hrs-new', 'hrs-old', 'transparency', 'move-right'];
+    return ['speed', 'img-size', 'font-size', 'item-gap', 'color-new', 'color-old', 'hrs-new', 'hrs-old', 'transparency', 'moveright'];
   }
 
   constructor() {
@@ -112,8 +112,8 @@ export default class RssTicker extends HTMLElement {
     this._impl.connected = false;
     this._impl.errmsg = undefined;
     this._impl.fetchOpts = undefined;
-    this.setAttribute('color-new', 'rgb(' + dftColorNew[0] + ', ' + dftColorNew[1] + ', ' + dftColorNew[2] +')');
-    this.setAttribute('color-old', 'rgb(' + dftColorOld[0] + ', ' + dftColorOld[1] + ', ' + dftColorOld[2] +')');
+    this.setAttribute('color-new', '#' + rgbToHex(dftColorNew[0], dftColorNew[1], dftColorNew[2]));
+    this.setAttribute('color-old', '#' + rgbToHex(dftColorOld[0], dftColorOld[1], dftColorOld[2]));
   }
 
   connectedCallback() {
@@ -128,12 +128,12 @@ export default class RssTicker extends HTMLElement {
     this._impl.upgradeProperty('hrsNew');
     this._impl.upgradeProperty('hrsOld');
     this._impl.upgradeProperty('transparency');
-    this._impl.upgradeProperty('infoBoxLinkColor');
-    this._impl.upgradeProperty('infoBoxLinkBgColor');
+    this._impl.upgradeProperty('infoboxLinkColor');
+    this._impl.upgradeProperty('infoboxLinkBgColor');
     this._impl.upgradeProperty('keepUrl');
     this._impl.upgradeProperty('refetchMins');
     this._impl.upgradeProperty('noImgs');
-    this._impl.upgradeProperty('moveRight');
+    this._impl.upgradeProperty('moveright');
     this._impl.upgradeProperty('proxyUrl');
     this._impl.upgradeProperty('contRun');
     this._impl.connected = true;
@@ -177,13 +177,13 @@ export default class RssTicker extends HTMLElement {
         this._impl.transparencyChanged();
         break;
       case 'infobox-link-color':
-        this._impl.infoBoxLinkColorChanged();
+        this._impl.infoboxLinkColorChanged();
         break;
       case 'infobox-link-bgcolor':
-        this._impl.infoBoxLinkBgColorChanged();
+        this._impl.infoboxLinkBgColorChanged();
         break;
-      case 'move-right':
-        this._impl.moveRightChanged();
+      case 'moveright':
+        this._impl.moverightChanged();
         break;
     }
   }
@@ -253,7 +253,7 @@ export default class RssTicker extends HTMLElement {
   get itemGap() {
     let v;
     v = (v = (this.hasAttribute('item-gap') ? this.getAttribute('item-gap') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '1' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : Srring(v);
+    return isNaN(v) ? '1' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
   }
 
   set colorNew(v) {
@@ -267,10 +267,11 @@ export default class RssTicker extends HTMLElement {
   get colorNew() {
     let v = this.hasAttribute('color-new') ? this.getAttribute('color-new').trim() : '';
     if (v.length === 0) {
-      return this.hasAttribute('color-old') ? this.getAttribute('color-old').trim() : '';
+      v = this.hasAttribute('color-old') ? this.getAttribute('color-old').trim() : '';
     } else {
-      return v;
+      v = rgbStr(v);
     }
+    return v || rgbToHex(...dftColorNew);
   }
 
   set colorOld(v) {
@@ -284,10 +285,11 @@ export default class RssTicker extends HTMLElement {
   get colorOld() {
     let v = this.hasAttribute('color-old') ? this.getAttribute('color-old').trim() : '';
     if (v.length === 0) {
-      return this.hasAttribute('color-new') ? this.getAttribute('color-new').trim() : '';
+      v = this.hasAttribute('color-new') ? this.getAttribute('color-new').trim() : '';
     } else {
-      return v;
+      v = rgbStr(v);
     }
+    return v || rgbToHex(...dftColorOld);
   }
 
   set hrsNew(v) {
@@ -329,10 +331,10 @@ export default class RssTicker extends HTMLElement {
   get transparency() {
     let v;
     v = (v = (this.hasAttribute('transparency') ? this.getAttribute('transparency') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '0.4' : v < 0 ? '0' : v > 1 ? '1' : String(v);
+    return isNaN(v) ? '0.1' : v < 0 ? '0' : v > 1 ? '1' : String(v);
   }
 
-  set infoBoxLinkColor(v) {
+  set infoboxLinkColor(v) {
     if (v === undefined || v === null) {
       this.removeAttribute('infobox-link-color');
     } else {
@@ -340,11 +342,11 @@ export default class RssTicker extends HTMLElement {
     }
   }
 
-  get infoBoxLinkColor() {
-    return this.hasAttribute('infobox-link-color') ? this.getAttribute('infobox-link-color').trim() : '';
+  get infoboxLinkColor() {
+    return rgbStr(this.hasAttribute('infobox-link-color') ? this.getAttribute('infobox-link-color').trim() : '') || '';
   }
 
-  set infoBoxLinkBgColor(v) {
+  set infoboxLinkBgColor(v) {
     if (v === undefined || v === null) {
       this.removeAttribute('infobox-link-bgcolor');
     } else {
@@ -352,12 +354,12 @@ export default class RssTicker extends HTMLElement {
     }
   }
 
-  get infoBoxLinkBgColor() {
-    return this.hasAttribute('infobox-link-bgcolor') ? this.getAttribute('infobox-link-bgcolor').trim() : '';
+  get infoboxLinkBgColor() {
+    return rgbStr(this.hasAttribute('infobox-link-bgcolor') ? this.getAttribute('infobox-link-bgcolor').trim() : '') || '#fff';
   }
 
   set keepUrl(v) {
-    if (Boolean(v)) {
+    if (v) {
       this.setAttribute('keep-url', '');
     } else {
       this.removeAttribute('keep-url');
@@ -379,11 +381,11 @@ export default class RssTicker extends HTMLElement {
   get refetchMins() {
     let v;
     v = (v = (this.hasAttribute('refetch-mins') ? this.getAttribute('refetch-mins') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '5' : v < 0 ? '0' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? '10' : v < 0 ? '0' : v > 999999 ? '999999' : String(v);
   }
 
   set noImgs(v) {
-    if (Boolean(v)) {
+    if (v) {
       this.setAttribute('no-imgs', '');
     } else {
       this.removeAttribute('no-imgs');
@@ -394,16 +396,16 @@ export default class RssTicker extends HTMLElement {
     return this.hasAttribute('no-imgs');
   }
 
-  set moveRight(v) {
-    if (Boolean(v)) {
-      this.setAttribute('move-right', '');
+  set moveright(v) {
+    if (v) {
+      this.setAttribute('moveright', '');
     } else {
-      this.removeAttribute('move-right');
+      this.removeAttribute('moveright');
     }
   }
 
-  get moveRight() {
-    return this.hasAttribute('move-right');
+  get moveright() {
+    return this.hasAttribute('moveright');
   }
 
   set proxyUrl(v) {
@@ -419,7 +421,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   set contRun(v) {
-    if (Boolean(v)) {
+    if (v) {
       this.setAttribute('cont-run', '');
     } else {
       this.removeAttribute('cont-run');
@@ -495,14 +497,14 @@ function requestStart(url) {
   if (startRequestedCallback) {
     startRequestedCallback(url);
   }
-};
+}
 
 let stopRequestedCallback = null;
 function requestStop() {
   if (stopRequestedCallback) {
     stopRequestedCallback();
   }
-};
+}
 
 let speedChangedCallback = null;
 implexp.speedChanged = () => {
@@ -560,24 +562,24 @@ implexp.transparencyChanged = () => {
   }
 };
 
-let infoBoxLinkColorChangedCallback = null;
-implexp.infoBoxLinkColorChanged = () => {
-  if (infoBoxLinkColorChangedCallback) {
-    infoBoxLinkColorChangedCallback();
+let infoboxLinkColorChangedCallback = null;
+implexp.infoboxLinkColorChanged = () => {
+  if (infoboxLinkColorChangedCallback) {
+    infoboxLinkColorChangedCallback();
   }
 };
 
-let infoBoxLinkBgColorChangedCallback = null;
-implexp.infoBoxLinkBgColorChanged = () => {
-  if (infoBoxLinkBgColorChangedCallback) {
-    infoBoxLinkBgColorChangedCallback();
+let infoboxLinkBgColorChangedCallback = null;
+implexp.infoboxLinkBgColorChanged = () => {
+  if (infoboxLinkBgColorChangedCallback) {
+    infoboxLinkBgColorChangedCallback();
   }
 };
 
-let moveRightChangedCallback = null;
-implexp.moveRightChanged = () => {
-  if (moveRightChangedCallback) {
-    moveRightChangedCallback();
+let moverightChangedCallback = null;
+implexp.moverightChanged = () => {
+  if (moverightChangedCallback) {
+    moverightChangedCallback();
   }
 };
 
@@ -592,9 +594,9 @@ function clearElemCallbacks() {
   hrsNewChangedCallback = null;
   hrsOldChangedCallback = null;
   transparencyChangedCallback = null;
-  infoBoxLinkColorChangedCallback = null;
-  infoBoxLinkBgColorChangedCallback = null;
-  moveRightChangedCallback = null;
+  infoboxLinkColorChangedCallback = null;
+  infoboxLinkBgColorChangedCallback = null;
+  moverightChangedCallback = null;
 }
 
 function runticker(f, url) {
@@ -654,7 +656,7 @@ async function tick(tc, url) {
   if (!phimg) {
     phimg = new Image();
     phimg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAEGWlDQ1BrQ0dDb2xvclNwYWNlR2VuZXJpY1JHQgAAOI2NVV1oHFUUPrtzZyMkzlNsNIV0qD8NJQ2TVjShtLp/3d02bpZJNtoi6GT27s6Yyc44M7v9oU9FUHwx6psUxL+3gCAo9Q/bPrQvlQol2tQgKD60+INQ6Ium65k7M5lpurHeZe58853vnnvuuWfvBei5qliWkRQBFpquLRcy4nOHj4g9K5CEh6AXBqFXUR0rXalMAjZPC3e1W99Dwntf2dXd/p+tt0YdFSBxH2Kz5qgLiI8B8KdVy3YBevqRHz/qWh72Yui3MUDEL3q44WPXw3M+fo1pZuQs4tOIBVVTaoiXEI/MxfhGDPsxsNZfoE1q66ro5aJim3XdoLFw72H+n23BaIXzbcOnz5mfPoTvYVz7KzUl5+FRxEuqkp9G/Ajia219thzg25abkRE/BpDc3pqvphHvRFys2weqvp+krbWKIX7nhDbzLOItiM8358pTwdirqpPFnMF2xLc1WvLyOwTAibpbmvHHcvttU57y5+XqNZrLe3lE/Pq8eUj2fXKfOe3pfOjzhJYtB/yll5SDFcSDiH+hRkH25+L+sdxKEAMZahrlSX8ukqMOWy/jXW2m6M9LDBc31B9LFuv6gVKg/0Szi3KAr1kGq1GMjU/aLbnq6/lRxc4XfJ98hTargX++DbMJBSiYMIe9Ck1YAxFkKEAG3xbYaKmDDgYyFK0UGYpfoWYXG+fAPPI6tJnNwb7ClP7IyF+D+bjOtCpkhz6CFrIa/I6sFtNl8auFXGMTP34sNwI/JhkgEtmDz14ySfaRcTIBInmKPE32kxyyE2Tv+thKbEVePDfW/byMM1Kmm0XdObS7oGD/MypMXFPXrCwOtoYjyyn7BV29/MZfsVzpLDdRtuIZnbpXzvlf+ev8MvYr/Gqk4H/kV/G3csdazLuyTMPsbFhzd1UabQbjFvDRmcWJxR3zcfHkVw9GfpbJmeev9F08WW8uDkaslwX6avlWGU6NRKz0g/SHtCy9J30o/ca9zX3Kfc19zn3BXQKRO8ud477hLnAfc1/G9mrzGlrfexZ5GLdn6ZZrrEohI2wVHhZywjbhUWEy8icMCGNCUdiBlq3r+xafL549HQ5jH+an+1y+LlYBifuxAvRN/lVVVOlwlCkdVm9NOL5BE4wkQ2SMlDZU97hX86EilU/lUmkQUztTE6mx1EEPh7OmdqBtAvv8HdWpbrJS6tJj3n0CWdM6busNzRV3S9KTYhqvNiqWmuroiKgYhshMjmhTh9ptWhsF7970j/SbMrsPE1suR5z7DMC+P/Hs+y7ijrQAlhyAgccjbhjPygfeBTjzhNqy28EdkUh8C+DU9+z2v/oyeH791OncxHOs5y2AtTc7nb/f73TWPkD/qwBnjX8BoJ98VQNcC+8AAAALSURBVAgdY2AAAgAABQABjbub8wAAAABJRU5ErkJggg==';
-    phimg = await (new Promise((res, rej) => {
+    phimg = await (new Promise((res) => {
       phimg.onload = () => res(phimg);
       phimg.onerror = () => res(null);
     }));
@@ -670,7 +672,7 @@ async function tick(tc, url) {
   let initItemElsBusy = false, initItemElsBusy2 = false;
   let wq = [], wqi = 0;
   let rssSelMode = 0, rssSelItemno = 0, rssSelItemnox = 0, rssSelPosX = 0, rssSelPosY = 0, rssSelPosD = 0, rssSelMouseUp = true;
-  let mvright = elem.moveRight;
+  let mvright = elem.moveright;
   let colorNew, colorOld, hrsNew, hrsOld;
   let itemInfoBox = null, itemInfoBoxLinks = [];
   let epageY = 0;
@@ -739,18 +741,8 @@ async function tick(tc, url) {
   };
 
   colorChangedCallback = () => {
-    let c = extractColorValue(elem.colorNew);
-    if (c) {
-      colorNew = [c[0], c[1], c[2]];
-    } else {
-      colorNew = [dftColorNew[0], dftColorNew[1], dftColorNew[2]];
-    }
-    c = extractColorValue(elem.colorOld);
-    if (c) {
-      colorOld = [c[0], c[1], c[2]];
-    } else {
-      colorOld = [dftColorOld[0], dftColorOld[1], dftColorOld[2]];
-    }
+    colorNew = strToRgba(elem.colorNew);
+    colorOld = strToRgba(elem.colorOld);
   };
   colorChangedCallback();
 
@@ -769,21 +761,21 @@ async function tick(tc, url) {
     addwork(workChangeTransparency, null);
   };
 
-  infoBoxLinkColorChangedCallback = () => {
+  infoboxLinkColorChangedCallback = () => {
     if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0) {
       updateItemInfoBoxColor();
     }
   };
 
-  infoBoxLinkBgColorChangedCallback = () => {
+  infoboxLinkBgColorChangedCallback = () => {
     if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0) {
       updateItemInfoBoxColor();
     }
   };
 
-  moveRightChangedCallback = () => {
-    if (elem.moveRight !== mvright) {
-      mvright = elem.moveRight;
+  moverightChangedCallback = () => {
+    if (elem.moveright !== mvright) {
+      mvright = elem.moveright;
       if (rssstart) {
         pos = 1 - pos;
       }
@@ -952,7 +944,7 @@ async function tick(tc, url) {
     wrapper.style.transition = 'opacity 1s ease-out';
     wrapper.style.opacity = '0';
     window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
-    await (new Promise((res,rej) => {
+    await (new Promise((res) => {
       setTimeout(() => res(null), 1000);
     }));
     clearItemEls();
@@ -984,7 +976,7 @@ async function tick(tc, url) {
     window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
     if (c) {
       initItemElsBusy2 = true;
-      await (new Promise((res,rej) => {
+      await (new Promise((res) => {
         setTimeout(() => res(null), 3000);
       }));
       initItemElsBusy2 = false;
@@ -1003,7 +995,7 @@ async function tick(tc, url) {
   function addItemEl(ino, title, date, img) {
     let e, e0, e1, e2, e3, et, ed, dt = false, col;
     if (!date || typeof date === 'string' || date instanceof String) {
-      col = dftColorNew;
+      col = crtItemColor(null);
     } else {
       col = crtItemColor(date);
     }
@@ -1066,7 +1058,7 @@ async function tick(tc, url) {
       ed.textContent = crtItemDateText(date);
     }
     if (ino) {
-      let mouseDownListener = ev => {
+      let mouseDownListener = () => {
         rssSelItemno = ino;
       };
       e0.addEventListener('touchstart', e => {
@@ -1157,6 +1149,9 @@ async function tick(tc, url) {
   }
 
   function crtItemColor(dat) {
+    if (!dat) {
+      return [colorNew[0], colorNew[1], colorNew[2]];
+    }
     let ms = new Date().getTime() - dat;
     let h = ms / 1000 / 3600;
     if (h <= hrsNew) {
@@ -1249,10 +1244,9 @@ async function tick(tc, url) {
     }
   }
 
-  function workChangeTransparency(i, p, r) {
-    if (i === -1) {
-    } else if (i === -2) {
-    } else {
+  function workChangeTransparency(i) {
+    if (i !== -1 && i !== -2) {
+      let col = itemEls[i-1][6].col ? itemEls[i-1][6].col : dftColorNew;
       itemEls[i-1][4].style.background = 'radial-gradient(rgba('+col[0]+', '+col[1]+', '+col[2]+', 1), rgba('+col[0]+', '+col[1]+', '+col[2]+', '+((1-transparency)/2)+'))';
       if (itemInfoBox && rssSelMode > 1 && rssSelItemno > 0 && rssSelItemno === i) {
         updateItemInfoBoxColor();
@@ -1314,7 +1308,7 @@ async function tick(tc, url) {
     wqi = 0;
   }
 
-  function windowMouseDownHandler0(e) {
+  function windowMouseDownHandler0() {
     rssSelItemnox = rssSelItemno;
     rssSelItemno = 0;
   }
@@ -1499,7 +1493,7 @@ async function tick(tc, url) {
     itemInfoBox.style.left = '0px';
     itemInfoBox.style.bottom = '';
     itemInfoBox.style.right = '';
-    let e, e1, e2, e3 = null, dcont = false;;
+    let e, e1, e2, e3 = null, dcont = false;
     e1 = document.createElement('span');
     e1.style.lineHeight = '1.3';
     if (rsslist[rssSelItemno].description) {
@@ -1629,15 +1623,15 @@ async function tick(tc, url) {
     let col = itemEls[rssSelItemno-1][6].col ? itemEls[rssSelItemno-1][6].col : dftColorNew;
     itemInfoBox.style.backgroundColor = 'rgba(' + col[0] + ', ' + col[1] + ', ' + col[2] + ', ' + (1-transparency) +')';
     let ct, cbg;
-    let c = extractColorValue(elem.infoBoxLinkColor);
-    if (c) {
-      ct = [c[0], c[1], c[2], c[3]];
+    let s = elem.infoboxLinkColor;
+    if (s) {
+      ct = strToRgba(s);
     } else {
       ct = [col[0], col[1], col[2], 1];
     }
-    c = extractColorValue(elem.infoBoxLinkBgColor);
-    if (c) {
-      cbg = [c[0], c[1], c[2]];
+    s = elem.infoboxLinkBgColor;
+    if (s) {
+      cbg = strToRgba(s);
     } else {
       cbg = [255, 255, 255];
     }
@@ -1650,16 +1644,16 @@ async function tick(tc, url) {
   function crtItemInfoBoxLink(ih, href) {
     let ct, cbg;
     let col = itemEls[rssSelItemno-1][6].col ? itemEls[rssSelItemno-1][6].col : dftColorNew;
-    let c = extractColorValue(elem.infoBoxLinkColor);
-    if (c) {
-      ct = [c[0], c[1], c[2], c[3]];
+    let s = elem.infoboxLinkColor;
+    if (s) {
+      ct = strToRgba(s);
     } else {
       ct = [col[0], col[1], col[2], 1];
     }
     function rcbg() {
-      c = extractColorValue(elem.infoBoxLinkBgColor);
-      if (c) {
-        cbg = [c[0], c[1], c[2]];
+      s = elem.infoboxLinkBgColor;
+      if (s) {
+        cbg = strToRgba(s);
       } else {
         cbg = [255, 255, 255];
       }
@@ -2110,7 +2104,7 @@ async function tick(tc, url) {
         for (let q = 1; q <= 9; q++) {
           let ua = q0.get(q);
           if (ua) {
-            await new Promise((res, rej) => {
+            await new Promise((res) => {
               let c = ua.reduce((a, v) => a + (v ? 1 : 0), 0);
               if (c === 0) {
                 res(null);
@@ -2138,7 +2132,7 @@ async function tick(tc, url) {
               }
               if (msi > -1) {
                 let a = [ua[msi], new Image()];
-                await new Promise((res, rej) => {
+                await new Promise((res) => {
                   a[1].src = a[0].src;
                   a[1].onload = () => {res(null);};
                   a[1].onerror = () => {a[1] = null; res(null);};
@@ -2180,40 +2174,44 @@ async function tick(tc, url) {
   return implexp;
 }
 
-// https://stackoverflow.com/questions/34980574/how-to-extract-color-values-from-rgb-string-in-javascript
-function extractColorValue(color) {
-  if (!color || color.trim() === '') {
-    return undefined;
+function rgbStr(str) {
+  let s = str ? str.replace(/[^A-Fa-f0-9]/g, '') : '';
+  if (s && (s.length === 3 || s.length === 4 || s.length === 6 || s.length === 8)) {
+    return '#' + s;
   }
-  if (color[0] === '#') {
-    if (color.length < 7) {
-      color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3] + (color.length > 4 ? color[4] + color[4] : '');
-    }
-    return [ parseInt(color.substr(1, 2), 16), parseInt(color.substr(3, 2), 16), parseInt(color.substr(5, 2), 16), color.length > 7 ? parseInt(color.substr(7, 2), 16) / 255 : 1];
+  return null;
+}
+
+function rgbToHex(r, g, b) {
+  let sr = r.toString(16), sg = g.toString(16), sb = b.toString(16);
+  if (sr.length === 1) {
+    sr = '0' + sr;
   }
-  if (color.indexOf('rgb') === -1) {
-    let tempElem = document.body.appendChild(document.createElement('fictum')); // intentionally use unknown tag to lower chances of css rule override with !important
-    let flag = 'rgb(1, 2, 3)'; // this flag tested on chrome 59, ff 53, ie9, ie10, ie11, edge 14
-    tempElem.style.color = flag;
-    if (tempElem.style.color !== flag) {
-      document.body.removeChild(tempElem);
-      return undefined; // color set failed - some monstrous css rule is probably taking over the color of our object
-    }
-    tempElem.style.color = color;
-    if (tempElem.style.color === flag || tempElem.style.color === '') {
-      document.body.removeChild(tempElem);
-      return undefined; // color parse failed
-    }
-    color = getComputedStyle(tempElem).color;
-    document.body.removeChild(tempElem);
+  if (sg.length === 1) {
+    sg = '0' + sg;
   }
-  if (color.indexOf('rgb') === 0) {
-    if (color.indexOf('rgba') === -1) {
-      color += ',1'; // convert 'rgb(R,G,B)' to 'rgb(R,G,B)A' which looks awful but will pass the regxep below
-    }
-    return color.match(/[\.\d]+/g).map(a => parseFloat(a));
+  if (sb.length === 1) {
+    sb = '0' + sb;
   }
-  return undefined;
+  return sr + sg + sb;
+}
+
+function strToRgba(str) {
+  let s = str && str.length > 0 ? str.substring(0, 1) === '#' ? str.substring(1) : str : '';
+  let rgba = [0, 0, 0, 255], i
+  if (s.length > 0 && s.length < 5) {
+    for (i = 0; i < s.length; i++) {
+      rgba[i] = parseInt(s.substring(i, 1).repeat(2), 16);
+    }
+  } else if (s.length > 5 && s.length < 9) {
+    if (s.length % 2 === 1) {
+      s = '0' + s;
+    }
+    for (i = 0; i < s.length - 1; i += 2) {
+      rgba[i/2] = parseInt(s.substring(i, i + 2), 16);
+    }
+  }
+  return rgba;
 }
 
 customElements.define('rss-ticker', RssTicker);

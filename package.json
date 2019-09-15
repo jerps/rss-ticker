@@ -1,6 +1,6 @@
 {
   "name": "@jerps/rss-ticker",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "main": "rss-ticker.min.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
@@ -8,12 +8,12 @@
   },
   "description": "A html custom element (web component) that implements an RSS/Atom ticker",
   "keywords": [
-    "custom-element",
-    "webcomponent",
     "rss",
+    "atom",
     "rss-ticker",
-    "rss-reader",
-    "atom"
+    "rss reader",
+    "custom-element",
+    "webcomponent"
   ],
   "license": "MIT",
   "author": {
@@ -36,6 +36,10 @@
     "LICENSE.txt",
     "src"
   ],
+  "dependencies": {
+    "core-js-pure": "^3.2.1",
+    "regenerator-runtime": "^0.13.3"
+  },
   "devDependencies": {
     "@babel/core": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
@@ -44,9 +48,5 @@
     "webpack": "^4.40.2",
     "webpack-cli": "^3.3.8",
     "webpack-merge": "^4.2.2"
-  },
-  "dependencies": {
-    "core-js-pure": "^3.2.1",
-    "regenerator-runtime": "^0.13.3"
   }
 }
