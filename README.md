@@ -1,4 +1,4 @@
-## rss-ticker v0.4.0 - A html custom element (web component) that implements an RSS/Atom ticker
+## rss-ticker v0.4.1 - A html custom element (web component) that implements an RSS/Atom ticker
 
 ***
 
@@ -7,6 +7,10 @@
 rss-ticker is [MIT Licensed](LICENSE.txt). You may use, distribute and copy it under the license terms.
 
 ### Changes
+
+* v0.4.1 (september 15, 2019)
+
+  * Added static method `apNames` to return an array with attribute/property names.
 
 * v0.4.0 (september 15, 2019)
 

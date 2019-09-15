@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.4.0
+rss-ticker v0.4.1
 
 (c) 2019 John Erps
 
@@ -102,7 +102,31 @@ export default class RssTicker extends HTMLElement {
     return ['speed', 'img-size', 'font-size', 'item-gap', 'color-new', 'color-old', 'hrs-new', 'hrs-old', 'transparency', 'moveright'];
   }
 
+  static get apNames() {
+     return [
+        'url', 'url',
+        'speed', 'speed',
+        'img-size', 'imgSize',
+        'font-size', 'fontSize',
+        'item-gap', 'itemGap',
+        'color-new', 'colorNew',
+        'color-old', 'colorOld',
+        'hrs-new', 'hrsNew',
+        'hrs-old', 'hrsOld',
+        'transparency', 'transparency',
+        'infobox-link-color', 'infoboxLinkColor',
+        'infobox-link-bgcolor', 'infoboxLinkBgColor',
+        'keep-url', 'keepUrl',
+        'refetch-mins', 'refetchMins',
+        'no-imgs', 'noImgs',
+        'moveright', 'moveright',
+        'proxy-url', 'proxyUrl',
+        'cont-run', 'contRun'
+     ];
+  }
+
   constructor() {
+    apNames();
     super();
     this.attachShadow({mode: 'open'});
     this.shadowRoot.appendChild(document.importNode(rssHtml.content, true));
