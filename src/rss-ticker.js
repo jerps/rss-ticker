@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.4.1
+rss-ticker v0.5.0
 
 (c) 2019 John Erps
 
@@ -141,24 +141,10 @@ export default class RssTicker extends HTMLElement {
 
   connectedCallback() {
     window.ShadyCSS && window.ShadyCSS.styleElement(this);
-    this._impl.upgradeProperty('url');
-    this._impl.upgradeProperty('speed');
-    this._impl.upgradeProperty('imgSize');
-    this._impl.upgradeProperty('fontSize');
-    this._impl.upgradeProperty('itemGap');
-    this._impl.upgradeProperty('colorNew');
-    this._impl.upgradeProperty('colorOld');
-    this._impl.upgradeProperty('hrsNew');
-    this._impl.upgradeProperty('hrsOld');
-    this._impl.upgradeProperty('transparency');
-    this._impl.upgradeProperty('infoboxLinkColor');
-    this._impl.upgradeProperty('infoboxLinkBgColor');
-    this._impl.upgradeProperty('keepUrl');
-    this._impl.upgradeProperty('refetchMins');
-    this._impl.upgradeProperty('noImgs');
-    this._impl.upgradeProperty('moveright');
-    this._impl.upgradeProperty('proxyUrl');
-    this._impl.upgradeProperty('contRun');
+    let apn = RssTicker.apNames;
+    for (let i = 0; i < apn.length - 1; i += 2) {
+      this._impl.upgradeProperty(apn[i+1]);
+    }
     this._impl.connected = true;
   }
 
@@ -331,7 +317,7 @@ export default class RssTicker extends HTMLElement {
 
   set hrsOld(v) {
     if (v === undefined || v === null) {
-      this.removeAttribute('hrs-new');
+      this.removeAttribute('hrs-old');
     } else {
       this.setAttribute('hrs-old', String(v));
     }
@@ -366,7 +352,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   get infoboxLinkColor() {
-    return rgbStr(this.hasAttribute('infobox-link-color') ? this.getAttribute('infobox-link-color').trim() : '') || '';
+    return rgbStr(this.hasAttribute('infobox-link-color') ? this.getAttribute('infobox-link-color').trim() : '', 1) || '';
   }
 
   set infoboxLinkBgColor(v) {
@@ -382,7 +368,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   set keepUrl(v) {
-    if (v) {
+    if (v === 'true' || v && v !== 'false') {
       this.setAttribute('keep-url', '');
     } else {
       this.removeAttribute('keep-url');
@@ -408,7 +394,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   set noImgs(v) {
-    if (v) {
+    if (v === 'true' || v && v !== 'false') {
       this.setAttribute('no-imgs', '');
     } else {
       this.removeAttribute('no-imgs');
@@ -420,7 +406,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   set moveright(v) {
-    if (v) {
+    if (v === 'true' || v && v !== 'false') {
       this.setAttribute('moveright', '');
     } else {
       this.removeAttribute('moveright');
@@ -444,7 +430,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   set contRun(v) {
-    if (v) {
+    if (v === 'true' || v && v !== 'false') {
       this.setAttribute('cont-run', '');
     } else {
       this.removeAttribute('cont-run');
@@ -1650,7 +1636,7 @@ async function tick(tc, url) {
     if (s) {
       ct = strToRgba(s);
     } else {
-      ct = [col[0], col[1], col[2], 1];
+      ct = [col[0], col[1], col[2], 255];
     }
     s = elem.infoboxLinkBgColor;
     if (s) {
@@ -1659,8 +1645,8 @@ async function tick(tc, url) {
       cbg = [255, 255, 255];
     }
     for (const a of itemInfoBoxLinks) {
-      a[0].style.color = 'rgba(' + ct[0] + ', ' + ct[1] + ', ' + ct[2] + ', ' + ct[3] + ')';
       a[0].style.backgroundColor = 'rgba(' + cbg[0] + ', ' + cbg[1] + ', ' + cbg[2] + ', ' + a[1] + ')';
+      a[0].style.color = 'rgba(' + ct[0] + ', ' + ct[1] + ', ' + ct[2] + ', ' + (ct[3] / 255) + ')';
     }
   }
 
@@ -1671,7 +1657,7 @@ async function tick(tc, url) {
     if (s) {
       ct = strToRgba(s);
     } else {
-      ct = [col[0], col[1], col[2], 1];
+      ct = [col[0], col[1], col[2], 255];
     }
     function rcbg() {
       s = elem.infoboxLinkBgColor;
@@ -1686,7 +1672,7 @@ async function tick(tc, url) {
     a[0].style.transition = 'background-color 0.4s ease-out';
     a[0].style.backgroundColor = 'rgba(' + cbg[0] + ', ' + cbg[1] + ', ' + cbg[2] + ', ' + a[1] + ')';
     a[0].style.cursor = 'pointer';
-    a[0].style.color = 'rgba(' + ct[0] + ', ' + ct[1] + ', ' + ct[2] + ', ' + ct[3], ')';
+    a[0].style.color = 'rgba(' + ct[0] + ', ' + ct[1] + ', ' + ct[2] + ', ' + (ct[3] / 255), ')';
     a[0].innerHTML = ih;
     let t1 = null;
     a[0].addEventListener('mouseenter', e => {
@@ -2197,12 +2183,42 @@ async function tick(tc, url) {
   return implexp;
 }
 
-function rgbStr(str) {
+function rgbStr(str, x) {
   let s = str ? str.replace(/[^A-Fa-f0-9]/g, '') : '';
-  if (s && (s.length === 3 || s.length === 4 || s.length === 6 || s.length === 8)) {
-    return '#' + s;
+  if (!s) {
+    return null;
   }
-  return null;
+  if (s.length === 1) {
+    s += '00';
+  } else if (s.length === 2 || s.length === 5 || s.length === 7) {
+    s += '0';
+  } else if (s.length > 8) {
+    s = s.substring(0, 8);
+  }
+  if (!x) {
+    if (s.length === 4) {
+      s = s.substring(0, 3);
+    } else if (s.length === 8) {
+      s = s.substring(0, 6);
+    }
+  }
+  if (s.length % 2 === 0) {
+    let f = true, i;
+    for (i = 0; i < s.length - 1; i += 2) {
+      if (s.substring(i, i + 1) !== s.substring(i + 1, i + 2)) {
+        f = false;
+        break;
+      }
+    }
+    if (f) {
+      let s2 = '';
+      for (i = 0; i < s.length - 1; i += 2) {
+        s2 += s.substring(i, i + 1);
+      }
+      s = s2;
+    }
+  }
+  return '#' + s;
 }
 
 function rgbToHex(r, g, b) {
@@ -2216,15 +2232,20 @@ function rgbToHex(r, g, b) {
   if (sb.length === 1) {
     sb = '0' + sb;
   }
+  if (sr.substring(0, 1) === sr.substring(1, 2) && sg.substring(0, 1) === sg.substring(1, 2) && sb.substring(0, 1) === sb.substring(1, 2)) {
+    sr = sr.substring(0, 1);
+    sg = sg.substring(0, 1);
+    sb = sb.substring(0, 1);
+  }
   return sr + sg + sb;
 }
 
 function strToRgba(str) {
   let s = str && str.length > 0 ? str.substring(0, 1) === '#' ? str.substring(1) : str : '';
-  let rgba = [0, 0, 0, 255], i
+  let rgba = [0, 0, 0, 255], i;
   if (s.length > 0 && s.length < 5) {
     for (i = 0; i < s.length; i++) {
-      rgba[i] = parseInt(s.substring(i, 1).repeat(2), 16);
+      rgba[i] = parseInt(s.substring(i, i + 1).repeat(2), 16);
     }
   } else if (s.length > 5 && s.length < 9) {
     if (s.length % 2 === 1) {
