@@ -206,8 +206,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   get url() {
-    let v;
-    return (v = this.hasAttribute('url') ? this.getAttribute('url') : '') ? v : 'http://rss.cnn.com/rss/edition.rss';
+    return (this.hasAttribute('url') ? this.getAttribute('url').trim() : '') || 'http://rss.cnn.com/rss/edition.rss';
   }
 
   set speed(v) {
@@ -427,8 +426,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   get proxyUrl() {
-    let v;
-    return (v = this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') ? v : '%%_URL_%%';
+    return (this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') || '%%_URL_%%';
   }
 
   set contRun(v) {
