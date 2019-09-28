@@ -33,7 +33,7 @@ rssHtml.innerHTML = `
       flex-direction: row;
       align-items: center;
       white-space: nowrap;
-      margin: 0;
+      margin: auto 0 auto 0;
       padding: 0;
       border-width: 0;
       cursor: default;
@@ -206,8 +206,8 @@ export default class RssTicker extends HTMLElement {
   }
 
   get url() {
-    let v = (v = this.hasAttribute('url') ? this.getAttribute('url') : '') ? v : 'http://rss.cnn.com/rss/edition.rss';
-    return v;
+    let v;
+    return (v = this.hasAttribute('url') ? this.getAttribute('url') : '') ? v : 'http://rss.cnn.com/rss/edition.rss';
   }
 
   set speed(v) {
@@ -427,8 +427,8 @@ export default class RssTicker extends HTMLElement {
   }
 
   get proxyUrl() {
-    let v = (v = this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') ? v : '%%_URL_%%';
-    return v;
+    let v;
+    return (v = this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') ? v : '%%_URL_%%';
   }
 
   set contRun(v) {
