@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.6.0
+rss-ticker v0.6.1
 
 (c) 2019 John Erps
 
@@ -206,7 +206,8 @@ export default class RssTicker extends HTMLElement {
   }
 
   get url() {
-    return this.hasAttribute('url') ? this.getAttribute('url') : '';
+    let v = (v = this.hasAttribute('url') ? this.getAttribute('url') : '') ? v : 'http://rss.cnn.com/rss/edition.rss';
+    return v;
   }
 
   set speed(v) {
@@ -426,7 +427,8 @@ export default class RssTicker extends HTMLElement {
   }
 
   get proxyUrl() {
-    return this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '';
+    let v = (v = this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') ? v : '%%_URL_%%';
+    return v;
   }
 
   set contRun(v) {
