@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.6.1
+rss-ticker v0.7.0
 
 (c) 2019 John Erps
 
@@ -21,7 +21,7 @@ rssHtml.innerHTML = `
       box-sizing: border-box;
     }
     :host {
-      display: inline;
+      display: flex;
       overflow-x: hidden;
     }
     :host([hidden]) {
@@ -30,23 +30,20 @@ rssHtml.innerHTML = `
     #wrapper {
       position: relative;
       display: flex;
-      flex-direction: row;
       align-items: center;
       white-space: nowrap;
-      margin: auto 0 auto 0;
       padding: 0;
       border-width: 0;
       cursor: default;
     }
     .itemcont {
       border-width: 0;
-      margin: 0;
       padding: 0;
     }
     .item {
       border-width: 0;
-      margin: 0;
       padding: 0;
+      margin: 0;
       display: flex;
       user-select: none;
     }
@@ -57,7 +54,6 @@ rssHtml.innerHTML = `
     .itemimg {
       padding: 0.2em 0.8em 0.2em 1.1em;
       display: flex;
-      flex-direction: row;
       align-items: center;
     }
     .item-text {
@@ -700,6 +696,7 @@ async function tick(tc, url) {
         ri[a] = d[a];
       }
     }
+    ri.inum = rsslist.length;
     for (const l of implexp.runningListeners) {
       l.call(elem, ri);
     }
@@ -961,7 +958,8 @@ async function tick(tc, url) {
       elem.style.display = 'flex';
       elem.style.justifyContent = 'center';
     } else {
-      elem.style.display = 'inline-block';
+      elem.style.display = 'flex';
+      elem.style.justifyContent = '';
     }
     if (msg1 || msg2) {
       if (img) {
@@ -1972,21 +1970,23 @@ async function tick(tc, url) {
                   lhref = s;
                 }
               }
-              let ua = extractImgUrls(s), q = 9;
-              if (ua.length > 0) {
-                if (t0.includes('image') && t1.includes('url') && ai === -1) {
-                  q = 1;
-                } else if (t0.includes('enclosure') && ci1 === -1 && an === 'url') {
-                  q = 2;
-                } else if (t0.includes('image') || ci1 !== -1 && t1.includes('image') || ai !== -1 && an.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || ai !== -1 && an.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || ai !== -1 && an.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || ai !== -1 && an.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo') || ai !== -1 && an.includes('logo')) {
-                  q = 3;
-                } else if (t0.includes('title') || t0.includes('description') || t0.includes('summary') || t0.includes('content')) {
-                  q = 5;
+              if (rsslist[0].reqImgs) {
+                let ua = extractImgUrls(s), q = 9;
+                if (ua.length > 0) {
+                  if (t0.includes('image') && t1.includes('url') && ai === -1) {
+                    q = 1;
+                  } else if (t0.includes('enclosure') && ci1 === -1 && an === 'url') {
+                    q = 2;
+                  } else if (t0.includes('image') || ci1 !== -1 && t1.includes('image') || ai !== -1 && an.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || ai !== -1 && an.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || ai !== -1 && an.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || ai !== -1 && an.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo') || ai !== -1 && an.includes('logo')) {
+                    q = 3;
+                  } else if (t0.includes('title') || t0.includes('description') || t0.includes('summary') || t0.includes('content')) {
+                    q = 5;
+                  }
+                  addiu(n, q, ua);
                 }
-                addiu(n, q, ua);
-              }
-              if (ai !== -1 && (an.includes('url') || an.includes('link')) && (t0.includes('image') || ci1 !== -1 && t1.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo'))) {
-                addiu(n, 4, [s]);
+                if (ai !== -1 && (an.includes('url') || an.includes('link')) && (t0.includes('image') || ci1 !== -1 && t1.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo'))) {
+                  addiu(n, 4, [s]);
+                }
               }
             }
             if (ai === -1) {

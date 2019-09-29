@@ -1,4 +1,4 @@
-## rss-ticker v0.6.1 - A html custom element (web component) that implements an RSS/Atom ticker
+## rss-ticker v0.7.0 - A html custom element (web component) that implements an RSS/Atom ticker
 
 ***
 
@@ -8,9 +8,15 @@ rss-ticker is [MIT Licensed](LICENSE). You may use, distribute and copy it under
 
 ### Changes
 
-* v0.6.1 (september 28, 2019)
+* v0.7.0 (september 29, 2019)
+
+  * Several bugfixes.
 
   * Changed defaults of attrs `url` and `proxy-url`.
+
+  * The ticker items now center vertically within the vertical space of the rss-ticker element.
+
+  * When `running` event is triggered the information object now also contains property `inum` which is the number of items.
 
 * v0.6.0 (september 28, 2019)
 
