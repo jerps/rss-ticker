@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.7.0
+rss-ticker v0.7.1
 
 (c) 2019 John Erps
 
@@ -1062,7 +1062,7 @@ async function tick(tc, url) {
     et.innerHTML = title.trim() || '- - -';
     if (dt) {
       ed.style.width = '' + ed.getBoundingClientRect().width + 'px';
-      ed.textContent = crtItemDateText(date);
+      ed.textContent = crtItemDateText(date, 0, ino);
     }
     if (ino) {
       let mouseDownListener = () => {
@@ -1135,23 +1135,30 @@ async function tick(tc, url) {
     window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
   }
 
-  function crtItemDateText(dat, x) {
+  function crtItemDateText(dat, x, i) {
+    let s;
     if (x) {
-      return dat.toLocaleString()+' \u22C5\u22C5\u22C5 d888 h88 m88';
+      return '888 \u22C5\u22C5 ' + dat.toLocaleString()+' \u22C5\u22C5 d888 h88 m88';
     } else {
       let ms = new Date().getTime() - dat;
       if (ms < 0) {
-        return dat.toLocaleString()+' \u22C5\u22C5\u22C5 d<0';
+        s = dat.toLocaleString()+' \u22C5\u22C5 d<0';
       } else {
         let h = Math.trunc(ms / 1000 / 3600);
         let d = Math.trunc(h / 24);
         if (d > 999) {
-          return dat.toLocaleString()+' \u22C5\u22C5\u22C5 d>999';
+          s = dat.toLocaleString()+' \u22C5\u22C5 d>999';
+        } else {
+          let m = Math.trunc((ms - h * 3600 * 1000) / 1000 / 60);
+          h -= d * 24;
+          s = dat.toLocaleString()+' \u22C5\u22C5'+(d>0?' d'+d:'')+(h>0?' h'+h:'')+' m'+m;
         }
-        let m = Math.trunc((ms - h * 3600 * 1000) / 1000 / 60);
-        h -= d * 24;
-        return dat.toLocaleString()+' \u22C5\u22C5\u22C5'+(d>0?' d'+d:'')+(h>0?' h'+h:'')+' m'+m;
       }
+    }
+    if (i) {
+      return String(i) + ' \u22C5\u22C5 ' + s;
+    } else {
+      return s;
     }
   }
 
@@ -1225,7 +1232,7 @@ async function tick(tc, url) {
     if (c === mc) {
       if (p > 0 && p < rsslist.length && p <= itemEls.length) {
         if (rsslist[p].date) {
-          itemEls[p-1][2].textContent = crtItemDateText(rsslist[p].date);
+          itemEls[p-1][2].textContent = crtItemDateText(rsslist[p].date, 0, p);
           let col = crtItemColor(rsslist[p].date);
           let col2 = itemEls[p-1][6].col;
           if (!col2 || col[0] !== col2[0] || col[1] !== col2[1] || col[2] !== col2[2]) {
