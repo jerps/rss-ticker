@@ -696,7 +696,7 @@ async function tick(tc, url) {
         ri[a] = d[a];
       }
     }
-    ri.inum = rsslist.length;
+    ri.inum = rsslist.length - 1;
     for (const l of implexp.runningListeners) {
       l.call(elem, ri);
     }
