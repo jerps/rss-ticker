@@ -1055,7 +1055,7 @@ async function tick(tc, url) {
     }
     ed.textContent = s.trim() || '- - -';
     e.appendChild(ed);
-    itemEls.push([e2, e0, ed, e3, e1, et, {col}, s]);
+    itemEls.push([e2, e0, ed, e3, e1, et, {col}, dt ? s : null]);
     if (img) {
       img.style.borderRadius = '' + Math.round((img.getBoundingClientRect().width + img.getBoundingClientRect().height) / 2 / 5) + 'px';
     }
@@ -1132,11 +1132,13 @@ async function tick(tc, url) {
     itemEls[i-1][4].style.borderRadius = '' + Math.round(h / 3) + 'px';
     itemEls[i-1][6].itemGapPx = g;
     itemEls[i-1][6].itemGap = ig;
-    itemEls[i-1][2].style.width = '';
-    let t = itemEls[i-1][2].textContent;
-    itemEls[i-1][2].textContent = itemEls[i-1][7];
-    itemEls[i-1][2].style.width = '' + itemEls[i-1][2].getBoundingClientRect().width + 'px';
-    itemEls[i-1][2].textContent = t;
+    if (itemEls[i-1][7]) {
+      itemEls[i-1][2].style.width = '';
+      let t = itemEls[i-1][2].textContent;
+      itemEls[i-1][2].textContent = itemEls[i-1][7];
+      itemEls[i-1][2].style.width = '' + itemEls[i-1][2].getBoundingClientRect().width + 'px';
+      itemEls[i-1][2].textContent = t;
+    }
     window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
   }
 
@@ -1587,7 +1589,7 @@ async function tick(tc, url) {
       e = document.createElement('div');
       e.style.fontSize = '110%';
       e.style.margin = 'auto 0.6rem auto 0';
-      e.textContent = '\u25B6';
+      e.textContent = '\u25CF';
       e2.appendChild(e);
       e = document.createElement('div');
       e.style.fontSize = '80%';
