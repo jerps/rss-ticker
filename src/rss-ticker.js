@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.7.1
+rss-ticker v0.7.2
 
 (c) 2019 John Erps
 
@@ -230,7 +230,7 @@ export default class RssTicker extends HTMLElement {
   get imgSize() {
     let v;
     v = (v = (this.hasAttribute('img-size') ? this.getAttribute('img-size') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '4' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? '4' : v < 0.001 ? '0.001' : v > 999 ? '999' : String(v);
   }
 
   set fontSize(v) {
@@ -244,7 +244,7 @@ export default class RssTicker extends HTMLElement {
   get fontSize() {
     let v;
     v = (v = (this.hasAttribute('font-size') ? this.getAttribute('font-size') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '1' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? '1' : v < 0.001 ? '0.001' : v > 999 ? '999' : String(v);
   }
 
   set itemGap(v) {
@@ -258,7 +258,7 @@ export default class RssTicker extends HTMLElement {
   get itemGap() {
     let v;
     v = (v = (this.hasAttribute('item-gap') ? this.getAttribute('item-gap') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '1' : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? '1' : v < 0.001 ? '0.001' : v > 999 ? '999' : String(v);
   }
 
   set colorNew(v) {
@@ -308,7 +308,7 @@ export default class RssTicker extends HTMLElement {
   get hrsNew() {
     let v;
     v = (v = (this.hasAttribute('hrs-new') ? this.getAttribute('hrs-new') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? String(dftHrsNew) : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? String(dftHrsNew) : v < 0.001 ? '0.001' : v > 999 ? '999' : String(v);
   }
 
   set hrsOld(v) {
@@ -322,7 +322,7 @@ export default class RssTicker extends HTMLElement {
   get hrsOld() {
     let v;
     v = (v = (this.hasAttribute('hrs-old') ? this.getAttribute('hrs-old') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? String(dftHrsOld) : v < 0.000001 ? '0.000001' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? String(dftHrsOld) : v < 0.001 ? '0.001' : v > 999 ? '999' : String(v);
   }
 
   set transparency(v) {
@@ -386,7 +386,7 @@ export default class RssTicker extends HTMLElement {
   get refetchMins() {
     let v;
     v = (v = (this.hasAttribute('refetch-mins') ? this.getAttribute('refetch-mins') : '').trim()) ? Number(v) : NaN;
-    return isNaN(v) ? '10' : v < 0 ? '0' : v > 999999 ? '999999' : String(v);
+    return isNaN(v) ? '10' : v < 0 ? '0' : v > 999 ? '999' : String(v);
   }
 
   set noImgs(v) {
@@ -680,7 +680,7 @@ async function tick(tc, url) {
   let mvright = elem.moveright;
   let colorNew, colorOld, hrsNew, hrsOld;
   let itemInfoBox = null, itemInfoBoxLinks = [];
-  let epageY = 0;
+  let epageY = 0, ltpx = 0, ltpy = 0;
 
   actc = tc;
 
@@ -1046,7 +1046,6 @@ async function tick(tc, url) {
     e.appendChild(et);
     ed = document.createElement('div');
     ed.classList.add('item-date');
-    itemEls.push([e2, e0, ed, e3, e1, et, {col}]);
     let s = '';
     if (typeof date === 'string' || date instanceof String) {
       s = date.trim();
@@ -1056,6 +1055,7 @@ async function tick(tc, url) {
     }
     ed.textContent = s.trim() || '- - -';
     e.appendChild(ed);
+    itemEls.push([e2, e0, ed, e3, e1, et, {col}, s]);
     if (img) {
       img.style.borderRadius = '' + Math.round((img.getBoundingClientRect().width + img.getBoundingClientRect().height) / 2 / 5) + 'px';
     }
@@ -1132,6 +1132,11 @@ async function tick(tc, url) {
     itemEls[i-1][4].style.borderRadius = '' + Math.round(h / 3) + 'px';
     itemEls[i-1][6].itemGapPx = g;
     itemEls[i-1][6].itemGap = ig;
+    itemEls[i-1][2].style.width = '';
+    let t = itemEls[i-1][2].textContent;
+    itemEls[i-1][2].textContent = itemEls[i-1][7];
+    itemEls[i-1][2].style.width = '' + itemEls[i-1][2].getBoundingClientRect().width + 'px';
+    itemEls[i-1][2].textContent = t;
     window.ShadyCSS && window.ShadyCSS.styleSubtree(elem);
   }
 
@@ -1408,7 +1413,7 @@ async function tick(tc, url) {
   function windowTouchEndListener(e) {
     if (e.touches.length === 0) {
       windowMouseUpHandlerFlag = true;
-      windowMouseUpHandler(neweo2(e));
+      windowMouseUpHandler(neweo3(e));
     }
   }
   function windowMouseUpListener(e) {
@@ -1585,7 +1590,7 @@ async function tick(tc, url) {
       e.textContent = '\u25B6';
       e2.appendChild(e);
       e = document.createElement('div');
-      e.style.fontSize = '75%';
+      e.style.fontSize = '80%';
       e.style.wordBreak = 'break-all';
       e.style.lineHeight = '1.2';
       e1 = crtItemInfoBoxLink(rsslist[rssSelItemno].link, rsslist[rssSelItemno].link);
@@ -1789,7 +1794,13 @@ async function tick(tc, url) {
     return { x: e.pageX, y: e.pageY, oe: e };
   }
   function neweo2(e) {
-    return e.touches.length === 0 ? { x: 0, y: 0, oe: e } : { x: e.touches[0].clientX, y: e.touches[0].clientY, oe: e };
+    let e2 = e.touches.length === 0 ? { x: 0, y: 0, oe: e } : { x: e.touches[0].clientX || 0, y: e.touches[0].clientY || 0, oe: e };
+    ltpx = e2.x;
+    ltpy = e2.y;
+    return e2;
+  }
+  function neweo3(e) {
+    return { x: ltpx, y: ltpy, oe: e };
   }
 
   function sanitizeUrl(url) {

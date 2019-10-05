@@ -1,6 +1,6 @@
 {
   "name": "@jerps/rss-ticker",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "main": "rss-ticker.min.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",

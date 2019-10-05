@@ -8,6 +8,10 @@ rss-ticker is [MIT Licensed](LICENSE). You may use, distribute and copy it under
 
 ### Changes
 
+* v0.7.2 (october 5, 2019)
+
+  * Bugfixes.
+
 * v0.7.1 (september 29, 2019)
 
   * Show item sequence number.
