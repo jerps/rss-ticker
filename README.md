@@ -1,4 +1,30 @@
-## rss-ticker v0.7.1 - A html custom element (web component) that implements an RSS/Atom ticker
+## **rss-ticker** v0.8.0 : RSS/Atom Feed Ticker As Custom HTML Element
+
+**rss-ticker** is a custom html element which shows an RSS/Atom feed as a horizontal sequence of items which repeatedly scrolls horizontally to show all items. Using the mouse or touch the feed can be controlled: stop, fast forward, rewind, and an info box can be shown showing the full description / content of an item.
+
+The items are shown in a color that is dependent on the item's publication date. Be default a "new" item is shown in red and an "old" item is shown in blue. Attributes can be set to change these colors and to specify when an item is "new" or "old".
+
+![](screenshot01.png)
+
+***
+
+[Demo page](https://johnerps.com/rss-ticker/demo.html)
+
+[Another page with a demo](https://johnerps.com#d) (click rss icon to edit attributes and see their effects)
+
+[Full Documentation](https://johnerps.com/rss-ticker/docs/index.html)
+
+***
+
+### Usage
+
+Because rss-ticker is an html element it is very easy to use. Just add it as any other element to a page, set attributes, and add styling. No Javascript needed.
+
+For example the following html code adds a rss-ticker and sets some attributes.
+
+````html
+fff
+````
 
 ***
 
@@ -7,6 +33,16 @@
 rss-ticker is [MIT Licensed](LICENSE). You may use, distribute and copy it under the license terms.
 
 ### Changes
+
+* v0.8.0 (october 6, 2019)
+
+  * Bugfixes.
+
+  * Added attribute `autostart`. Renamed attribute `moveright` to `scrollright`.
+
+  * Added demo.html.
+
+  * Started writing docs.
 
 * v0.7.2 (october 5, 2019)
 

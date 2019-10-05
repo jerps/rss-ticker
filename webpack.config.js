@@ -27,7 +27,7 @@ module.exports = env => {
     output: {
       path: path.resolve(__dirname),
       filename: 'rss-ticker.min.js',
-      library: 'ModuleRssTicker',
+      library: 'RssTicker',
       libraryTarget: 'umd'
     },
     plugins: [

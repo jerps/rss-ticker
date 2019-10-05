@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.7.2
+rss-ticker v0.8.0
 
 (c) 2019 John Erps
 
@@ -95,7 +95,7 @@ window.ShadyCSS && window.ShadyCSS.prepareTemplate(rssHtml, 'rss-ticker');
 export default class RssTicker extends HTMLElement {
 
   static get observedAttributes() {
-    return ['speed', 'img-size', 'font-size', 'item-gap', 'color-new', 'color-old', 'hrs-new', 'hrs-old', 'transparency', 'moveright'];
+    return ['speed', 'img-size', 'font-size', 'item-gap', 'color-new', 'color-old', 'hrs-new', 'hrs-old', 'transparency', 'scrollright'];
   }
 
   static get apNames() {
@@ -115,9 +115,10 @@ export default class RssTicker extends HTMLElement {
         'keep-url', 'keepUrl',
         'refetch-mins', 'refetchMins',
         'no-imgs', 'noImgs',
-        'moveright', 'moveright',
+        'scrollright', 'scrollright',
         'proxy-url', 'proxyUrl',
-        'cont-run', 'contRun'
+        'cont-run', 'contRun',
+        'autostart', 'autostart'
      ];
   }
 
@@ -131,8 +132,6 @@ export default class RssTicker extends HTMLElement {
     this._impl.connected = false;
     this._impl.errmsg = undefined;
     this._impl.fetchOpts = undefined;
-    this.setAttribute('color-new', '#' + rgbToHex(dftColorNew[0], dftColorNew[1], dftColorNew[2]));
-    this.setAttribute('color-old', '#' + rgbToHex(dftColorOld[0], dftColorOld[1], dftColorOld[2]));
   }
 
   connectedCallback() {
@@ -142,6 +141,19 @@ export default class RssTicker extends HTMLElement {
       this._impl.upgradeProperty(apn[i+1]);
     }
     this._impl.connected = true;
+    if (!this.hasAttribute('color-new') || !this.getAttribute('color-new')) {
+      this.setAttribute('color-new', '#' + rgbToHex(dftColorNew[0], dftColorNew[1], dftColorNew[2]));
+    }
+    if (!this.hasAttribute('color-old') || !this.getAttribute('color-old')) {
+      this.setAttribute('color-old', '#' + rgbToHex(dftColorOld[0], dftColorOld[1], dftColorOld[2]));
+    }
+    if (this.autostart) {
+      setTimeout(() => {
+        if (this._impl.connected) {
+          this.startTicker(undefined, true);
+        }
+      }, 2000);
+    }
   }
 
   disconnectedCallback() {
@@ -187,8 +199,8 @@ export default class RssTicker extends HTMLElement {
       case 'infobox-link-bgcolor':
         this._impl.infoboxLinkBgColorChanged();
         break;
-      case 'moveright':
-        this._impl.moverightChanged();
+      case 'scrollright':
+        this._impl.scrollrightChanged();
         break;
     }
   }
@@ -401,16 +413,16 @@ export default class RssTicker extends HTMLElement {
     return this.hasAttribute('no-imgs');
   }
 
-  set moveright(v) {
+  set scrollright(v) {
     if (v === 'true' || v && v !== 'false') {
-      this.setAttribute('moveright', '');
+      this.setAttribute('scrollright', '');
     } else {
-      this.removeAttribute('moveright');
+      this.removeAttribute('scrollright');
     }
   }
 
-  get moveright() {
-    return this.hasAttribute('moveright');
+  get scrollright() {
+    return this.hasAttribute('scrollright');
   }
 
   set proxyUrl(v) {
@@ -435,6 +447,18 @@ export default class RssTicker extends HTMLElement {
 
   get contRun() {
     return this.hasAttribute('cont-run');
+  }
+
+  set autostart(v) {
+    if (v === 'true' || v && v !== 'false') {
+      this.setAttribute('autostart', '');
+    } else {
+      this.removeAttribute('autostart');
+    }
+  }
+
+  get autostart() {
+    return this.hasAttribute('autostart');
   }
 
   get running() {
@@ -581,10 +605,10 @@ implexp.infoboxLinkBgColorChanged = () => {
   }
 };
 
-let moverightChangedCallback = null;
-implexp.moverightChanged = () => {
-  if (moverightChangedCallback) {
-    moverightChangedCallback();
+let scrollrightChangedCallback = null;
+implexp.scrollrightChanged = () => {
+  if (scrollrightChangedCallback) {
+    scrollrightChangedCallback();
   }
 };
 
@@ -601,7 +625,7 @@ function clearElemCallbacks() {
   transparencyChangedCallback = null;
   infoboxLinkColorChangedCallback = null;
   infoboxLinkBgColorChangedCallback = null;
-  moverightChangedCallback = null;
+  scrollrightChangedCallback = null;
 }
 
 function runticker(f, url) {
@@ -677,7 +701,7 @@ async function tick(tc, url) {
   let initItemElsBusy = false, initItemElsBusy2 = false;
   let wq = [], wqi = 0;
   let rssSelMode = 0, rssSelItemno = 0, rssSelItemnox = 0, rssSelPosX = 0, rssSelPosY = 0, rssSelPosD = 0, rssSelMouseUp = true;
-  let mvright = elem.moveright;
+  let scright = elem.scrollright;
   let colorNew, colorOld, hrsNew, hrsOld;
   let itemInfoBox = null, itemInfoBoxLinks = [];
   let epageY = 0, ltpx = 0, ltpy = 0;
@@ -779,9 +803,9 @@ async function tick(tc, url) {
     }
   };
 
-  moverightChangedCallback = () => {
-    if (elem.moveright !== mvright) {
-      mvright = elem.moveright;
+  scrollrightChangedCallback = () => {
+    if (elem.scrollright !== scright) {
+      scright = elem.scrollright;
       if (rssstart) {
         pos = 1 - pos;
       }
@@ -836,14 +860,14 @@ async function tick(tc, url) {
     if (itemInfoBox && rssSelMode > 1 && !rssSelMouseUp && rssSelPosY > 0) {
       let d = epageY - rssSelPosY;
       let r = itemInfoBox.getBoundingClientRect();
-      if (d < 0 && r.top < 0 || d > 0 && r.bottom > document.body.clientHeight) {
+      if (d < 0 && r.top < 0 || d > 0 && r.bottom > window.innerHeight) {
         itemInfoBox.style.top = '';
-        itemInfoBox.style.bottom = '' + (document.body.clientHeight - (r.bottom + screen.height * 0.03 * ((0 - d) / screen.height))) + 'px';
+        itemInfoBox.style.bottom = '' + (window.innerHeight - (r.bottom + screen.height * 0.03 * ((0 - d) / screen.height))) + 'px';
         r = itemInfoBox.getBoundingClientRect();
         if (r.top > 0) {
           itemInfoBox.style.top = '0px';
           itemInfoBox.style.bottom = '';
-        } else if (r.bottom < document.body.clientHeight) {
+        } else if (r.bottom < window.innerHeight) {
           itemInfoBox.style.top = '';
           itemInfoBox.style.bottom = '0px';
         }
@@ -922,7 +946,7 @@ async function tick(tc, url) {
       }
       pos2 = pos;
     }
-    if (mvright) {
+    if (scright) {
       x = 0 - 5 - itemslen + Math.round((elemlen + 10 + itemslen) * pos);
     } else {
       x = elemlen + 5 - Math.round((elemlen + 10 + itemslen) * pos);
@@ -1466,7 +1490,7 @@ async function tick(tc, url) {
         rssSelPosX = e.x;
       }
       rssSelPosD = (rssSelPosD = (Math.abs(e.x - rssSelPosX) < screen.width * 0.02 ? 0 : e.x > rssSelPosX ? e.x - rssSelPosX - screen.width * 0.02 : e.x - rssSelPosX + screen.width * 0.02)  / (screen.width / 2)) < -1 ? -1 : rssSelPosD > 1 ? 1 : rssSelPosD;
-      if (mvright) {
+      if (scright) {
         rssSelPosD = 0 - rssSelPosD;
       }
     }
@@ -1490,6 +1514,7 @@ async function tick(tc, url) {
       return;
     }
     let r1 = itemEls[rssSelItemno-1][4].getBoundingClientRect(), r2 = elem.getBoundingClientRect(), r3;
+    console.log(r1);
     if (r1.left < r2.left && r1.width - r2.left + r1.left < r1.width * 0.1 || r1.right > r2.right && r1.width - r1.right + r2.right < r1.width * 0.1) {
       return;
     }
@@ -1557,7 +1582,7 @@ async function tick(tc, url) {
       itemInfoBox.appendChild(e);
       itemInfoBox.appendChild(e2);
     }
-    let w = Math.round(document.body.clientWidth / 2);
+    let w = Math.round(window.innerWidth / 2);
     itemInfoBox.style.width = '' + w + 'px';
     let h = itemInfoBox.getBoundingClientRect().height, h0, w0, w1 = w / 3;
     do {
@@ -1606,11 +1631,11 @@ async function tick(tc, url) {
     itemInfoBox.style.top = '';
     itemInfoBox.style.left = '';
     r3 = itemInfoBox.getBoundingClientRect();
-    let b = document.body.clientHeight - r1.bottom + r1.height + 2 - (rssSelMode === 3 ? r1.height + 4 + r3.height : 0);
+    let b = window.innerHeight - r1.bottom + r1.height + 2 - (rssSelMode === 3 ? r1.height + 4 + r3.height : 0);
     if (b < 0) {
       b = 0;
     }
-    if (b + r3.height > document.body.clientHeight) {
+    if (b + r3.height > window.innerHeight) {
       itemInfoBox.style.top = '0px';
     } else {
       itemInfoBox.style.bottom = '' + b + 'px';
@@ -1622,8 +1647,8 @@ async function tick(tc, url) {
     if (l < r2.left) {
       l = r2.left;
     }
-    if (l + r3.width > document.body.clientWidth) {
-      l -= l + r3.width - document.body.clientWidth;
+    if (l + r3.width > window.innerWidth) {
+      l -= l + r3.width - window.innerWidth;
     }
     if (l < 0) {
       l = 0;
