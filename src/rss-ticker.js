@@ -1588,7 +1588,7 @@ async function tick(tc, url) {
     if (img) {
       e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].imga[1]);
       e3.style.float = 'left';
-      e3,style.maxWidth = '40%';
+      e3.style.maxWidth = '40%';
       e3.style.minHeight = '' + (itemEls[rssSelItemno-1][0].getBoundingClientRect().height * Number(elem.infoboxImgSize)) + 'px';
       e3.style.margin = '0 1.2rem 0 0';
     }
