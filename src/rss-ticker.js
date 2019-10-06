@@ -1534,7 +1534,6 @@ async function tick(tc, url) {
       return;
     }
     let r1 = itemEls[rssSelItemno-1][4].getBoundingClientRect(), r2 = elem.getBoundingClientRect(), r3;
-    console.log(r1);
     if (r1.left < r2.left && r1.width - r2.left + r1.left < r1.width * 0.1 || r1.right > r2.right && r1.width - r1.right + r2.right < r1.width * 0.1) {
       return;
     }
