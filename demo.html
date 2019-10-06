@@ -10,19 +10,28 @@
   <script src="rss-ticker.min.js"></script>
   <style>
     body {
-      background-color: #000;
-      color: white;
+      background-color: #1a1a1a;
     }
-    #rss {
+    #rss1 {
       position: absolute;
       right: 10%;
       left: 10%;
-      top: 80%;
+      top: 10%;
+      font-family: Verdana;
+      color: #1a1a1a;
+    }
+    #rss2 {
+      position: absolute;
+      right: 10%;
+      left: 10%;
+      bottom: 10%;
       font-family: Arial;
+      color: #e0e0e0;
     }
   </style>
 </head>
 <body>
-  <rss-ticker id="rss" autostart="3" infobox-img-size="3" color-new="#bbb" color-old="333" transparency="0.2" url="https://www.theguardian.com/uk/rss" proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"></rss-ticker>
+    <rss-ticker id="rss1" autostart="3" speed="2.5" color-new="#a44" color-old="#bbb" transparency="0.3" url="https://www.npr.org/rss/rss.php?id=1008" proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"></rss-ticker>
+    <rss-ticker id="rss2" autostart="5" speed="4" infobox-img-size="3" color-new="#777" color-old="#111" transparency="0.3" url="https://www.theguardian.com/uk/rss" proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"></rss-ticker>
 </body>
 </html>

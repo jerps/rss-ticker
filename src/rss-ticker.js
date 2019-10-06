@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.8.1
+rss-ticker v0.8.2
 
 (c) 2019 John Erps
 
@@ -1587,7 +1587,7 @@ async function tick(tc, url) {
     if (img) {
       e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].imga[1]);
       e3.style.float = 'left';
-      e3.style.maxWidth = '60%';
+      e3.style.maxWidth = '40%';
       e3.style.minWidth = '' + (itemEls[rssSelItemno-1][0].getBoundingClientRect().width * Number(elem.infoboxImgSize)) + 'px';
       e3.style.minHeight = '' + (itemEls[rssSelItemno-1][0].getBoundingClientRect().height * Number(elem.infoboxImgSize)) + 'px';
       e3.style.margin = '0 1.2rem 0 0';
@@ -1651,14 +1651,27 @@ async function tick(tc, url) {
     itemInfoBox.style.top = '';
     itemInfoBox.style.left = '';
     r3 = itemInfoBox.getBoundingClientRect();
-    let b = window.innerHeight - r1.bottom + r1.height + 2 - (rssSelMode === 3 ? r1.height + 4 + r3.height : 0);
-    if (b < 0) {
-      b = 0;
-    }
-    if (b + r3.height > window.innerHeight) {
-      itemInfoBox.style.top = '0px';
+    if (rssSelMode === 3) {
+      let t = r1.bottom + 3;
+      if (t + r3.height > window.innerHeight) {
+        if (r3.height > window.innerHeight) {
+          itemInfoBox.style.top = '0px';
+        } else {
+          itemInfoBox.style.bottom = '0px';
+        }
+      } else {
+        itemInfoBox.style.top = '' + t + 'px';
+      }
     } else {
-      itemInfoBox.style.bottom = '' + b + 'px';
+      let b = window.innerHeight - r1.bottom + r1.height + 3;
+      if (b < 0) {
+        b = 0;
+      }
+      if (b + r3.height > window.innerHeight) {
+        itemInfoBox.style.top = '0px';
+      } else {
+        itemInfoBox.style.bottom = '' + b + 'px';
+      }
     }
     let l = (r1.left + (r1.width - r3.width) / 2);
     if (l + r3.width > r2.right) {
