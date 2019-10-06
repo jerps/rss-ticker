@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.8.0
+rss-ticker v0.8.1
 
 (c) 2019 John Erps
 
@@ -101,22 +101,23 @@ export default class RssTicker extends HTMLElement {
   static get apNames() {
      return [
         'url', 'url',
+        'proxy-url', 'proxyUrl',
         'speed', 'speed',
         'img-size', 'imgSize',
         'font-size', 'fontSize',
+        'transparency', 'transparency',
         'item-gap', 'itemGap',
-        'color-new', 'colorNew',
-        'color-old', 'colorOld',
         'hrs-new', 'hrsNew',
         'hrs-old', 'hrsOld',
-        'transparency', 'transparency',
+        'color-new', 'colorNew',
+        'color-old', 'colorOld',
         'infobox-link-color', 'infoboxLinkColor',
         'infobox-link-bgcolor', 'infoboxLinkBgColor',
+        'infobox-img-size', 'infoboxImgSize',
         'keep-url', 'keepUrl',
         'refetch-mins', 'refetchMins',
         'no-imgs', 'noImgs',
         'scrollright', 'scrollright',
-        'proxy-url', 'proxyUrl',
         'cont-run', 'contRun',
         'autostart', 'autostart'
      ];
@@ -136,23 +137,25 @@ export default class RssTicker extends HTMLElement {
 
   connectedCallback() {
     window.ShadyCSS && window.ShadyCSS.styleElement(this);
-    let apn = RssTicker.apNames;
-    for (let i = 0; i < apn.length - 1; i += 2) {
-      this._impl.upgradeProperty(apn[i+1]);
-    }
-    this._impl.connected = true;
-    if (!this.hasAttribute('color-new') || !this.getAttribute('color-new')) {
-      this.setAttribute('color-new', '#' + rgbToHex(dftColorNew[0], dftColorNew[1], dftColorNew[2]));
-    }
-    if (!this.hasAttribute('color-old') || !this.getAttribute('color-old')) {
-      this.setAttribute('color-old', '#' + rgbToHex(dftColorOld[0], dftColorOld[1], dftColorOld[2]));
-    }
-    if (this.autostart) {
-      setTimeout(() => {
-        if (this._impl.connected) {
-          this.startTicker(undefined, true);
-        }
-      }, 2000);
+    if (!this._impl.connected) {
+      let apn = RssTicker.apNames;
+      for (let i = 0; i < apn.length - 1; i += 2) {
+        this._impl.upgradeProperty(apn[i+1]);
+      }
+      this._impl.connected = true;
+      if (!this.hasAttribute('color-new') || !this.getAttribute('color-new')) {
+        this.setAttribute('color-new', '#' + rgbToHex(dftColorNew[0], dftColorNew[1], dftColorNew[2]));
+      }
+      if (!this.hasAttribute('color-old') || !this.getAttribute('color-old')) {
+        this.setAttribute('color-old', '#' + rgbToHex(dftColorOld[0], dftColorOld[1], dftColorOld[2]));
+      }
+      if (Number(this.autostart) > 0) {
+        setTimeout(() => {
+          if (this._impl.connected) {
+            this.startTicker(undefined, true);
+          }
+        }, Number(this.autostart) * 1000);
+      }
     }
   }
 
@@ -351,6 +354,21 @@ export default class RssTicker extends HTMLElement {
     return isNaN(v) ? '0.1' : v < 0 ? '0' : v > 1 ? '1' : String(v);
   }
 
+
+  set infoboxImgSize(v) {
+    if (v === undefined || v === null) {
+      this.removeAttribute('infobox-img-size');
+    } else {
+      this.setAttribute('infobox-img-size', String(v));
+    }
+  }
+
+  get infoboxImgSize() {
+    let v;
+    v = (v = (this.hasAttribute('infobox-img-size') ? this.getAttribute('infobox-img-size') : '').trim()) ? Number(v) : NaN;
+    return isNaN(v) ? '2' : v < 0.001 ? '0.001' : v > 999 ? '999' : String(v);
+  }
+
   set infoboxLinkColor(v) {
     if (v === undefined || v === null) {
       this.removeAttribute('infobox-link-color');
@@ -450,15 +468,17 @@ export default class RssTicker extends HTMLElement {
   }
 
   set autostart(v) {
-    if (v === 'true' || v && v !== 'false') {
-      this.setAttribute('autostart', '');
-    } else {
+    if (v === undefined || v === null) {
       this.removeAttribute('autostart');
+    } else {
+      this.setAttribute('autostart', String(v));
     }
   }
 
   get autostart() {
-    return this.hasAttribute('autostart');
+    let v;
+    v = (v = (this.hasAttribute('autostart') ? this.getAttribute('autostart') : '').trim()) ? Number(v) : NaN;
+    return isNaN(v) ? '0' : v < 0 ? '0' : v > 999 ? '999' : String(v);
   }
 
   get running() {
@@ -1530,7 +1550,7 @@ async function tick(tc, url) {
     itemInfoBox.style.boxShadow = '-1px 7px 24px 3px rgba(0,0,0,0.75)';
     itemInfoBox.style.color = getComputedStyle(elem).color;
     itemInfoBox.style.fontFamily = getComputedStyle(elem).fontFamily;
-    itemInfoBox.style.fontSize = Math.round(parseFloat(getComputedStyle(itemEls[rssSelItemno-1][5]).fontSize) * 0.95);
+    itemInfoBox.style.fontSize = Math.round(parseFloat(getComputedStyle(itemEls[rssSelItemno-1][5]).fontSize) * 0.9);
     itemInfoBox.style.padding = '1.3rem 1.2rem 1rem 1.6rem';
     itemInfoBox.style.overflow = 'hidden';
     itemInfoBox.style.cursor = 'default';
@@ -1568,8 +1588,7 @@ async function tick(tc, url) {
     if (img) {
       e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].imga[1]);
       e3.style.float = 'left';
-      e3.style.maxWidth = '40%';
-      e3.style.maxHeight = '80%';
+      e3.style.minHeight = '' + (itemEls[rssSelItemno-1][0].getBoundingClientRect().height * Number(elem.infoboxImgSize)) + 'px';
       e3.style.margin = '0 1.2rem 0 0';
     }
     itemInfoBox.appendChild(e1);
@@ -1882,7 +1901,7 @@ async function tick(tc, url) {
         endFetch(null);
       }
       if (!r.ok) {
-        throw new Error('HTTP response not ok (' + r.status + ' ' + r.statusText() + ').');
+        throw new Error('HTTP response not ok (' + r.status + (r.statusText ? ' ' + r.statusText : '') + ').');
       }
 
       let t = String(await r.text()).trim();
