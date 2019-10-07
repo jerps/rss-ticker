@@ -11,6 +11,7 @@
   <style>
     body {
       background-color: #1a1a1a;
+      overflow: hidden;
     }
     #rss1 {
       position: absolute;
@@ -31,7 +32,28 @@
   </style>
 </head>
 <body>
-    <rss-ticker id="rss1" autostart="3" speed="2.5" color-new="#a44" color-old="#bbb" transparency="0.3" url="https://www.npr.org/rss/rss.php?id=1008" proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"></rss-ticker>
-    <rss-ticker id="rss2" autostart="5" speed="4" infobox-img-size="3" color-new="#777" color-old="#111" transparency="0.3" url="https://www.theguardian.com/uk/rss" proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"></rss-ticker>
+  <rss-ticker id="rss1"
+      proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"
+      autostart="3"
+      speed="2.5"
+      color-new="#a44"
+      color-old="#bbb"
+      hrs-old="6"
+      transparency="0.3"
+      infobox-link-bgcolor="#1a1a1a"
+      font-size="1.3"
+  ></rss-ticker>
+  <rss-ticker id="rss2"
+      url="https://www.theguardian.com/uk/rss"
+      proxy-url="https://johnerps.com/php/getfile.php?url=%%_URL_%%"
+      autostart="5"
+      speed="4"
+      infobox-img-size="3"
+      color-new="#888"
+      color-old="#333"
+      transparency="0.3"
+      infobox-link-color="#1a1a1a"
+      infobox-link-bgcolor="#b0b0b0"
+  ></rss-ticker>
 </body>
 </html>

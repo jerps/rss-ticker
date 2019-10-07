@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.8.2
+rss-ticker v0.9.0
 
 (c) 2019 John Erps
 
@@ -12,7 +12,7 @@ This software is licensed under the MIT license (see LICENSE)
 import "core-js-pure/stable";
 import "regenerator-runtime/runtime";
 
-const dftColorNew = [255, 0, 0], dftColorOld = [0, 0, 255], dftHrsNew = 1, dftHrsOld = 12, updItemTimingInterval = 20;
+const dftColorNew = [255, 0, 0], dftColorOld = [0, 0, 255], dftHrsNew = 0, dftHrsOld = 12, updItemTimingInterval = 20;
 
 const rssHtml = document.createElement('template');
 rssHtml.innerHTML = `
@@ -115,6 +115,7 @@ export default class RssTicker extends HTMLElement {
         'infobox-link-bgcolor', 'infoboxLinkBgColor',
         'infobox-img-size', 'infoboxImgSize',
         'refetch-mins', 'refetchMins',
+        'descr-or-content', 'descrOrContent',
         'keep-url', 'keepUrl',
         'no-imgs', 'noImgs',
         'scrollright', 'scrollright',
@@ -391,6 +392,20 @@ export default class RssTicker extends HTMLElement {
 
   get infoboxLinkBgColor() {
     return rgbStr(this.hasAttribute('infobox-link-bgcolor') ? this.getAttribute('infobox-link-bgcolor').trim() : '') || '#fff';
+  }
+
+  set descrOrContent(v) {
+    if (v === undefined || v === null) {
+      this.removeAttribute('descr-or-content');
+    } else {
+      this.setAttribute('descr-or-content', String(v));
+    }
+  }
+
+  get descrOrContent() {
+    let v;
+    v = (v = (this.hasAttribute('descr-or-content') ? this.getAttribute('descr-or-content') : '').trim()) ? Number(v) : NaN;
+    return isNaN(v) ? '0' : v < 0 ? '0' : v >= 4 ? '0' : String(Math.trunc(v));
   }
 
   set keepUrl(v) {
@@ -725,6 +740,7 @@ async function tick(tc, url) {
   let colorNew, colorOld, hrsNew, hrsOld;
   let itemInfoBox = null, itemInfoBoxLinks = [];
   let epageY = 0, ltpx = 0, ltpy = 0;
+  let plimgs = [];
 
   actc = tc;
 
@@ -1549,33 +1565,40 @@ async function tick(tc, url) {
     itemInfoBox.style.boxShadow = '-1px 7px 24px 3px rgba(0,0,0,0.75)';
     itemInfoBox.style.color = getComputedStyle(elem).color;
     itemInfoBox.style.fontFamily = getComputedStyle(elem).fontFamily;
-    itemInfoBox.style.fontSize = Math.round(parseFloat(getComputedStyle(itemEls[rssSelItemno-1][5]).fontSize) * 0.9);
+    itemInfoBox.style.fontSize = '' + elem.fontSize + 'rem';
     itemInfoBox.style.padding = '1.3rem 1.2rem 1rem 1.6rem';
     itemInfoBox.style.overflow = 'hidden';
     itemInfoBox.style.cursor = 'default';
     itemInfoBox.style.userSelect = 'none';
-    itemInfoBox.style.top = '0px';
-    itemInfoBox.style.left = '0px';
-    itemInfoBox.style.bottom = '';
-    itemInfoBox.style.right = '';
-    let e, e1, e2, e3 = null, dcont = false;
+    let e, e1, e2, e3 = null, dcont = false, descr = rsslist[rssSelItemno].description, cont = rsslist[rssSelItemno].content;
+    if (descr && cont && elem.descrOrContent !== '0') {
+      if (elem.descrOrContent === '1') {
+        cont = null;
+      } else if (elem.descrOrContent === '2') {
+        descr = null;
+      } else if (cont.length > descr.length) {
+        descr = null;
+      } else {
+        cont = null;
+      }
+    }
     e1 = document.createElement('span');
     e1.style.lineHeight = '1.3';
-    if (rsslist[rssSelItemno].description) {
-      e1.innerHTML = rsslist[rssSelItemno].description;
+    if (descr) {
+      e1.innerHTML = descr;
       e = cvtItemInfoBoxLinks(e1);
       replaceNodeChildren(e1, e.childNodes);
-    } else if (rsslist[rssSelItemno].content) {
-      e1.innerHTML = rsslist[rssSelItemno].content;
+    } else if (cont) {
+      e1.innerHTML = cont;
       dcont = true;
       e = cvtItemInfoBoxLinks(e1);
       replaceNodeChildren(e1, e.childNodes);
     }
     styleItemInfoBoxImages(e1);
-    if (rsslist[rssSelItemno].description && rsslist[rssSelItemno].content) {
+    if (descr && cont) {
       e2 = document.createElement('span');
       e2.style.lineHeight = '1.3';
-      e2.innerHTML = rsslist[rssSelItemno].content;
+      e2.innerHTML = cont;
       styleItemInfoBoxImages(e2);
       if (e2.textContent.trim() !== e1.textContent.trim()) {
         dcont = true;
@@ -1583,7 +1606,7 @@ async function tick(tc, url) {
         replaceNodeChildren(e2, e.childNodes);
       }
     }
-    let img = rsslist[rssSelItemno].image && (!rsslist[rssSelItemno].description || !rsslist[rssSelItemno].description.includes(rsslist[rssSelItemno].imga[1].src)) && (!dcont || !rsslist[rssSelItemno].content || !rsslist[rssSelItemno].content.includes(rsslist[rssSelItemno].imga[1].src));
+    let img = rsslist[rssSelItemno].image && (!descr || !descr.includes(rsslist[rssSelItemno].imga[1].src)) && (!dcont || !cont || !cont.includes(rsslist[rssSelItemno].imga[1].src));
     if (img) {
       e3 = itemInfoBox.appendChild(rsslist[rssSelItemno].imga[1]);
       e3.style.float = 'left';
@@ -1593,7 +1616,7 @@ async function tick(tc, url) {
       e3.style.margin = '0 1.2rem 0 0';
     }
     itemInfoBox.appendChild(e1);
-    if (rsslist[rssSelItemno].description && rsslist[rssSelItemno].content && dcont) {
+    if (descr && cont && dcont) {
       e = document.createElement('br');
       itemInfoBox.appendChild(e);
       e = document.createElement('span');
@@ -1648,8 +1671,6 @@ async function tick(tc, url) {
       e3.style.borderRadius = '' + Math.round(Math.min(w0,h0)/16) + 'px';
     }
     itemInfoBox.style.borderRadius = '' + Math.round(Math.min(w0,h0)/8) + 'px';
-    itemInfoBox.style.top = '';
-    itemInfoBox.style.left = '';
     r3 = itemInfoBox.getBoundingClientRect();
     if (rssSelMode === 3) {
       let t = r1.bottom + 3;
@@ -1802,20 +1823,22 @@ async function tick(tc, url) {
     let n0 = n.cloneNode();
     let c = n.childNodes;
     for (const n1 of c) {
-      let l0 = n1.nodeName === 'A';
+      let l0 = n1.nodeName === 'A' || n1.nodeName === 'a';
       let n2 = cvtItemInfoBoxLinks(n1, l || l0);
       if (l0) {
         let href = '';
-        let a = n1.getAttributeNode('href');
-        if (a && a.nodeValue) {
-          href = a.nodeValue.trim();
+        if (!l) {
+          let a = n1.getAttributeNode('href');
+          if (a && a.nodeValue) {
+            href = a.nodeValue.trim();
+          }
         }
         let n3 = n2;
-        if (l || !href) {
+        if (href) {
+          n2 = crtItemInfoBoxLink(n3.innerHTML, href);
+        } else {
           n2 = document.createElement('span');
           n2.innerHTML = n3.innerHTML;
-        } else {
-          n2 = crtItemInfoBoxLink(n3.innerHTML, href);
         }
       }
       n0.appendChild(n2);
@@ -2053,12 +2076,12 @@ async function tick(tc, url) {
                 if (ua.length > 0) {
                   if (t0.includes('image') && t1.includes('url') && ai === -1) {
                     q = 1;
-                  } else if (t0.includes('enclosure') && ci1 === -1 && an === 'url') {
+                  } else if ((t0.includes('enclosure') || t0.includes('image')) && ci1 === -1 && an === 'url') {
                     q = 2;
                   } else if (t0.includes('image') || ci1 !== -1 && t1.includes('image') || ai !== -1 && an.includes('image') || t0.includes('media') || ci1 !== -1 && t1.includes('media') || ai !== -1 && an.includes('media') || t0.includes('thumbnail') || ci1 !== -1 && t1.includes('thumbnail') || ai !== -1 && an.includes('thumbnail') || t0.includes('icon') || ci1 !== -1 && t1.includes('icon') || ai !== -1 && an.includes('icon') || t0.includes('logo') || ci1 !== -1 && t1.includes('logo') || ai !== -1 && an.includes('logo')) {
                     q = 3;
                   } else if (t0.includes('title') || t0.includes('description') || t0.includes('summary') || t0.includes('content')) {
-                    q = 5;
+                    q = 9;
                   }
                   addiu(n, q, ua);
                 }
@@ -2129,6 +2152,28 @@ async function tick(tc, url) {
         }
         if (!i.description) {
           i.description = '';
+        }
+      }
+
+      let e = document.createElement('div');
+      for (let i = 1; i < rsslist.length; i++) {
+        e.innerHTML = rsslist[i].description || '';
+        let l = e.querySelectorAll('img');
+        for (const img of l) {
+          if (img.src) {
+            plimgs.push(new Image());
+            plimgs[plimgs.length - 1].src = img.src;
+            addiu(i, 8, [img.src]);
+          }
+        }
+        e.innerHTML = rsslist[i].content || '';
+        l = e.querySelectorAll('img');
+        for (const img of l) {
+          if (img.src) {
+            plimgs.push(new Image());
+            plimgs[plimgs.length - 1].src = img.src;
+            addiu(i, 8, [img.src]);
+          }
         }
       }
 
