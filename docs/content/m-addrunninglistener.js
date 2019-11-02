@@ -12,7 +12,7 @@ changes. A <b>running</b> event is emitted when the ticker is stopped.\
 The <b>running</b> listener function, <span class="code">listener</span>, is called with one argument which is an object \
 with zero or more of the following properties. Each property may be <span class="code">undefined</span>. The properties \
 pertain to the current run.\
-<div class="item1-h">id</div>\
+<div class="item1-h">id<span class="iptype">string</span></div>\
 <div class="item1-d">\
 The id of the <em>rss-ticker</em> element.\
 </div>\
