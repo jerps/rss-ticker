@@ -1,7 +1,7 @@
 /* eslint-disable require-atomic-updates */
 /*
 
-rss-ticker v0.9.0
+rss-ticker v1.1.0
 
 (c) 2019 John Erps
 
@@ -12,7 +12,7 @@ This software is licensed under the MIT license (see LICENSE)
 import "core-js-pure/stable";
 import "regenerator-runtime/runtime";
 
-const dftColorNew = [255, 0, 0], dftColorOld = [0, 0, 255], dftHrsNew = 0, dftHrsOld = 12, updItemTimingInterval = 20;
+const dftColorNew = [255, 0, 0], dftColorOld = [0, 0, 255], dftHrsNew = 1, dftHrsOld = 24, updItemTimingInterval = 20;
 
 const rssHtml = document.createElement('template');
 rssHtml.innerHTML = `
@@ -150,7 +150,7 @@ export default class RssTicker extends HTMLElement {
       if (!this.hasAttribute('color-old') || !this.getAttribute('color-old')) {
         this.setAttribute('color-old', '#' + rgbToHex(dftColorOld[0], dftColorOld[1], dftColorOld[2]));
       }
-      if (Number(this.autostart) > 0) {
+      if (this.hasAttribute('autostart')) {
         setTimeout(() => {
           if (this._impl.connected) {
             this.startTicker(undefined, true);
@@ -218,7 +218,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   get url() {
-    return (this.hasAttribute('url') ? this.getAttribute('url').trim() : '') || 'http://rss.cnn.com/rss/edition.rss';
+    return (this.hasAttribute('url') ? this.getAttribute('url').trim() : '') || '';
   }
 
   set speed(v) {
@@ -467,7 +467,7 @@ export default class RssTicker extends HTMLElement {
   }
 
   get proxyUrl() {
-    return (this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') || '%%_URL_%%';
+    return (this.hasAttribute('proxy-url') ? this.getAttribute('proxy-url').trim() : '') || '';
   }
 
   set contRun(v) {
@@ -1565,7 +1565,7 @@ async function tick(tc, url) {
     itemInfoBox.style.boxShadow = '-1px 7px 24px 3px rgba(0,0,0,0.75)';
     itemInfoBox.style.color = getComputedStyle(elem).color;
     itemInfoBox.style.fontFamily = getComputedStyle(elem).fontFamily;
-    itemInfoBox.style.fontSize = '' + elem.fontSize + 'rem';
+    itemInfoBox.style.fontSize = '1rem';
     itemInfoBox.style.padding = '1.3rem 1.2rem 1rem 1.6rem';
     itemInfoBox.style.overflow = 'hidden';
     itemInfoBox.style.cursor = 'default';
@@ -1783,7 +1783,7 @@ async function tick(tc, url) {
     });
     a[0].addEventListener('click', e => {
       e.preventDefault();
-      window.open(href, '_blank');
+      window.open(href, '_blank', 'noreferrer');
       a[0].style.transition = '';
       rcbg();
       a[1] = 1;

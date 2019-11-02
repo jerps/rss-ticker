@@ -1,12 +1,12 @@
 {
-  "name": "@jerps/rss-ticker",
-  "version": "0.9.0",
+  "name": "rss-ticker",
+  "version": "1.1.0",
   "main": "rss-ticker.min.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
     "build:prod": "webpack --config webpack.config.js --env.prod"
   },
-  "description": "A html custom element (web component) that implements an RSS/Atom ticker",
+  "description": "RSS/Atom Feed Ticker As Custom HTML Element",
   "keywords": [
     "rss",
     "atom",
@@ -18,7 +18,7 @@
   "license": "MIT",
   "author": {
     "name": "John Erps",
-    "email": "john@johnerps.com",
+    "email": "rss-ticker@johnerps.com",
     "url": "https://johnerps.com"
   },
   "homepage": "https://github.com/jerps/rss-ticker#readme",
@@ -33,7 +33,9 @@
     "rss-ticker.min.js",
     "rss-ticker.min.js.map",
     "README.md",
-    "LICENSE.txt",
+    "LICENSE",
+    "screenshot01.png",
+    "screenshot02.png",
     "src"
   ],
   "dependencies": {

@@ -1,0 +1,371 @@
+
+.apinfo {
+  font-family: Ubuntu Mono;
+  font-size: 90%;
+  display: grid;
+  grid-template-columns: 5em 15em;
+  grid-row-gap: 0.07em;
+  margin: 0 0 1.5em 3em;
+}
+.apinfo .g11, .apinfo .g21, .apinfo .g31, .apinfo .g41, .apinfo .g51 {
+  color: rgb(20, 110, 90);
+}
+.apinfo .g12, .apinfo .g22, .apinfo .g32, .apinfo .g42, .apinfo .g52 {
+  color: rgb(50, 40, 160);
+}
+
+.minfo {
+  font-family: Ubuntu Mono;
+  font-size: 90%;
+  display: grid;
+  grid-template-columns: 10em 10em;
+  grid-row-gap: 0.07em;
+  margin: 0 0 1.5em 3em;
+}
+.minfo .g11, .minfo .g21, .minfo .g31, .minfo .g41, .minfo .g51 {
+  color: rgba(20, 110, 90, 1);
+}
+.minfo .g12, .minfo .g22, .minfo .g32, .minfo .g42, .minfo .g52 {
+  color: rgb(50, 40, 160);
+}
+
+.item1-h {
+  font-family: Ubuntu;
+  font-size: 110%;
+  font-weight: bold;
+  margin-left: 2em;
+  margin-top: 0.3em;
+}
+
+.item1-h .iptype {
+  font-family: Ubuntu Mono;
+  font-size: 80%;
+  font-weight: normal;
+  font-style: italic;
+  margin-left: 1em;
+}
+
+.item1-d {
+  margin-left: 3.5em;
+}
+
+::selection {
+  background-color: rgba(200, 200, 70, 0.7);
+}
+
+* {
+  color: black;
+  line-height: 1.4;
+}
+
+html {
+  height: 100%;
+  font-size: 1.2vw;
+}
+
+body {
+  margin: 0.4rem 0 0 0;
+  padding: 0;
+  background-color: #F9F9F9;
+  letter-spacing: 0.01rem;
+}
+
+p {
+  margin: 0.7rem 0.5rem 0.4rem 1.3rem;
+}
+
+hr {
+  height: 3px;
+  background-color: rgba(150, 25, 25, 0.3);
+}
+
+em {
+  font-weight: bold;
+}
+
+#cpyr {
+  font-size: 0.7rem;
+  position: fixed;
+  bottom: 6px;
+  right: 18px;
+  text-align: right;
+  width: 100%;
+}
+
+#pname {
+  font-family: Ubuntu Mono;
+  font-weight: bold;
+  font-size: 1.8rem;
+  font-style: italic;
+  color: rgb(150, 25, 25);
+  display: inline;
+  margin: 0 0 0 5%;
+  cursor: pointer;
+}
+
+#docs {
+  font-family: Roboto Mono;
+  font-size: 1.2rem;
+  display: inline;
+  cursor: pointer;
+}
+
+@media all and (max-height: 450px) {
+  #pname {
+    font-size: 1.3rem;
+  }
+}
+@media all and (min-height: 451px) {
+  #pname {
+    font-size: 1.8rem;
+  }
+}
+@media all and (max-width: 500px) {
+  #docs {
+    visibility: hidden;
+  }
+}
+@media all and (min-width: 501px) {
+  #docs {
+    visibility: visible;
+  }
+}
+
+#emver {
+  float: right;
+  padding: 0.2% 0.5% 0 0;
+}
+
+#container {
+  font-family: Roboto;
+  font-size: 1rem;
+}
+
+#navigation {
+  position: fixed;
+  height: 88vh;
+  width: 18rem;
+  overflow-y: scroll;
+  margin: 1% 0% 0% 1.8%;
+  top: 5.5%;
+  border-top: 3px solid rgba(150, 25, 25, 0.3);
+}
+
+#content {
+  position: fixed;
+  height: 100vh;
+  overflow-y: scroll;
+  border-left: 3px solid rgba(150, 25, 25, 0.3);
+  left: 21rem;
+  top: 0%;
+  padding: 5% 3% 1.5% 3%;
+  right: 0px;
+  max-width: 60em;
+}
+
+#footer {
+  font-family: Roboto Mono;
+  font-size: 0.6rem;
+  position: absolute;
+  bottom: 0px;
+  text-align: right;
+  width: 100%;
+}
+
+.navlink1 {
+  display: block;
+  font-size: 1rem;
+  margin-top: 0.9rem;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+  line-height: 150%;
+  white-space: nowrap;
+}
+
+.navlink2 {
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.3rem;
+  margin-left: 1rem;
+  margin-right: 0;
+  white-space: nowrap;
+}
+
+.navlink3 {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0;
+  margin-left: 1.7rem;
+  margin-right: 0;
+  white-space: nowrap;
+}
+
+.navlink4 {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0;
+  margin-left: 1rem;
+  margin-right: 0;
+  white-space: nowrap;
+}
+
+.navprocnm {
+  display: inline;
+  font-family: Roboto Mono;
+  font-weight: bold;
+}
+
+.navprocd {
+}
+
+.navprocnm2 {
+  display: inline;
+  font-family: Ubuntu Mono;
+  font-size: 1rem;
+}
+
+.code {
+  font-family: Ubuntu Mono;
+  color: #0000B0;
+}
+
+a .code {
+  font-family: Ubuntu Mono;
+  color: #D03070;
+}
+
+.bullet1 {
+  color: rgba(255, 0, 0, 0.4);
+}
+
+a {
+  text-decoration: none;
+}
+#content a {
+  color: green;
+}
+
+h1 {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 2rem 0rem 1rem 0rem;
+}
+h2 {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0rem 0rem 1rem 1rem;
+}
+h3 {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0rem 0rem 1rem 1.9rem;
+}
+.lvl2 {
+  margin: 0rem 0rem 0rem 1.2rem;
+}
+.lvl3 {
+  margin: 0rem 0rem 0rem 1.6rem;
+}
+.g11 {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+.g12 {
+  grid-column-start: 2;
+  grid-row-start: 1;
+}
+.g21 {
+  grid-column-start: 1;
+  grid-row-start: 2;
+}
+.g22 {
+  grid-column-start: 2;
+  grid-row-start: 2;
+}
+.g31 {
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+.g32 {
+  grid-column-start: 2;
+  grid-row-start: 3;
+}
+.g41 {
+  grid-column-start: 1;
+  grid-row-start: 4;
+}
+.g42 {
+  grid-column-start: 2;
+  grid-row-start: 4;
+}
+.g51 {
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+.g52 {
+  grid-column-start: 2;
+  grid-row-start: 5;
+}
+.g61 {
+  grid-column-start: 1;
+  grid-row-start: 6;
+}
+.g62 {
+  grid-column-start: 2;
+  grid-row-start: 6;
+}
+.g71 {
+  grid-column-start: 1;
+  grid-row-start: 7;
+}
+.g72 {
+  grid-column-start: 2;
+  grid-row-start: 7;
+}
+.g81 {
+  grid-column-start: 1;
+  grid-row-start: 8;
+}
+.g82 {
+  grid-column-start: 2;
+  grid-row-start: 8;
+}
+.g91 {
+  grid-column-start: 1;
+  grid-row-start: 9;
+}
+.g92 {
+  grid-column-start: 2;
+  grid-row-start: 9;
+}
+.g101 {
+  grid-column-start: 1;
+  grid-row-start: 10;
+}
+.g102 {
+  grid-column-start: 2;
+  grid-row-start: 10;
+}
+.g111 {
+  grid-column-start: 1;
+  grid-row-start: 11;
+}
+.g112 {
+  grid-column-start: 2;
+  grid-row-start: 11;
+}
+.g121 {
+  grid-column-start: 1;
+  grid-row-start: 12;
+}
+.g122 {
+  grid-column-start: 2;
+  grid-row-start: 12;
+}
