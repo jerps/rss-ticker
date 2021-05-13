@@ -1,4 +1,4 @@
-## rss-ticker v1.1.0 : RSS/Atom Feed Ticker As Custom HTML Element
+## rss-ticker v1.1.1 : RSS/Atom Feed Ticker As Custom HTML Element
 
 ***
 
