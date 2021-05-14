@@ -1,3 +1,6 @@
+# This project has been archived
+
+***
 ## rss-ticker v1.1.1 : RSS/Atom Feed Ticker As Custom HTML Element
 
 ***
