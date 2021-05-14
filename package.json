@@ -1,6 +1,6 @@
 {
   "name": "rss-ticker",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "rss-ticker.min.js",
   "scripts": {
     "build:dev": "webpack --config webpack.config.js",
