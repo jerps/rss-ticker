@@ -63,6 +63,9 @@ This software is licensed under the MIT license (see LICENSE)
         transition: background-color 0.5s ease-out;
         border-radius: 1rem;
       }
+      .linktext {
+        color: burlywood;
+      }
       .link:hover {
         background-color: #333;
       }
@@ -84,13 +87,13 @@ This software is licensed under the MIT license (see LICENSE)
       ></rss-ticker>
       <div id="links">
         <a tabindex="-1" class="link" href="https://johnerps.com/rss-ticker/docs/index.html" target="_blank">
-          <span>&nbsp;● Documentation&nbsp;</span>
+          <span class="linktext">&nbsp;● Documentation&nbsp;</span>
         </a>
         <a tabindex="-1" class="link" href="https://johnerps.com#d" target="_blank">
-          <span>&nbsp;● Demo&nbsp;</span>
+          <span class="linktext">&nbsp;● Demo&nbsp;</span>
         </a>
         <a tabindex="-1" class="link" href="https://github.com/jerps/rss-ticker#readme" target="_blank">
-          <span>&nbsp;● GitHub&nbsp;</span>
+          <span class="linktext">&nbsp;● GitHub&nbsp;</span>
         </a>
       </div>
       <rss-ticker id="rss2"
