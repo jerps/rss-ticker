@@ -118,6 +118,10 @@ rss-ticker is [MIT Licensed](LICENSE). You may use, distribute and copy it under
 
 ### Changes
 
+* v1.1.1 (2021-05-14)
+
+  * Security updates.
+
 * v1.1.0 (2019-11-2)
 
   * Some bugfixes.
